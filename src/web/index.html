@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DiagIoT — Agentic Drift Detection Platform</title>
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar" role="banner">
+  <div class="topbar-brand">
+    <i class="ph-bold ph-cpu" aria-hidden="true"></i>
+    <span class="brand-name">DiagIoT</span>
+    <span class="brand-sub">Agentic Drift Engine</span>
+  </div>
+  <nav class="topbar-agents" aria-label="Active agents">
+    <span class="agent-pill preship"><span class="pulse-dot teal"></span>Pre-Ship</span>
+    <span class="agent-pill monitor"><span class="pulse-dot blue"></span>Monitor</span>
+    <span class="agent-pill onboard"><span class="pulse-dot amber"></span>Onboarding</span>
+  </nav>
+  <div class="topbar-right">
+    <span class="env-pill">Production</span>
+    <button class="topbar-btn cli-launch-btn" id="cliPanelBtn" title="Open CLI panel" aria-label="Open CLI panel">
+      <i class="ph-bold ph-terminal-window"></i>
+      <span>CLI</span>
+    </button>
+    <div class="avatar" aria-label="User: JD">JD</div>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" aria-label="Main navigation">
+  <div class="nav-group">
+    <div class="group-label preship-label">
+      <i class="ph-bold ph-shield-check"></i> Pre-Ship Agent
+    </div>
+    <a class="nav-link" data-screen="preship" href="#preship" onclick="switchScreen('preship');return false;">
+      <i class="ph-bold ph-scan"></i><span>Pre-Ship Scan</span>
+    </a>
+  </div>
+  <div class="nav-group">
+    <div class="group-label monitor-label">
+      <i class="ph-bold ph-eye"></i> Monitor &amp; Investigate
+    </div>
+    <a class="nav-link active" data-screen="dashboard" href="#dashboard" onclick="switchScreen('dashboard');return false;">
+      <i class="ph-bold ph-squares-four"></i><span>Dashboard</span>
+    </a>
+    <a class="nav-link" data-screen="field" href="#field" onclick="switchScreen('field');return false;">
+      <i class="ph-bold ph-broadcast"></i><span>Field Monitor</span>
+    </a>
+    <a class="nav-link" data-screen="drift" href="#drift" onclick="switchScreen('drift');return false;">
+      <i class="ph-bold ph-chart-line-up"></i><span>Drift Analysis</span>
+    </a>
+    <a class="nav-link" data-screen="timeline" href="#timeline" onclick="switchScreen('timeline');return false;">
+      <i class="ph-bold ph-clock-countdown"></i><span>Event Timeline</span>
+    </a>
+    <a class="nav-link" data-screen="diff" href="#diff" onclick="switchScreen('diff');return false;">
+      <i class="ph-bold ph-git-diff"></i><span>Firmware Diff</span>
+    </a>
+    <a class="nav-link" data-screen="repro" href="#repro" onclick="switchScreen('repro');return false;">
+      <i class="ph-bold ph-arrows-clockwise"></i><span>Reproduce</span>
+    </a>
+  </div>
+  <div class="nav-group">
+    <div class="group-label neutral-label">
+      <i class="ph-bold ph-link"></i> Shared
+    </div>
+    <a class="nav-link" data-screen="integrations" href="#integrations" onclick="switchScreen('integrations');return false;">
+      <i class="ph-bold ph-plugs-connected"></i><span>Integrations</span>
+    </a>
+  </div>
+  <div class="nav-group">
+    <div class="group-label onboard-label">
+      <i class="ph-bold ph-compass"></i> Onboarding Agent
+    </div>
+    <a class="nav-link" data-screen="onboard" href="#onboard" onclick="switchScreen('onboard');return false;">
+      <i class="ph-bold ph-graduation-cap"></i><span>Engineer Onboarding</span>
+    </a>
+    <a class="nav-link" data-screen="knowledge" href="#knowledge" onclick="switchScreen('knowledge');return false;">
+      <i class="ph-bold ph-books"></i><span>Knowledge Base</span>
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="agent-status-row"><span class="dot teal"></span>Pre-Ship — Active</div>
+    <div class="agent-status-row"><span class="dot blue"></span>Monitor — Active</div>
+    <div class="agent-status-row"><span class="dot amber"></span>Onboarding — Active</div>
+    <div class="conn-row"><span class="dot green"></span>Agentic Engine — Live</div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main" id="mainContent">
+  <!-- Screen tabs -->
+  <div class="screen-tabs" role="tablist" aria-label="Screen navigation">
+    <button role="tab" class="tab active" data-screen="dashboard" onclick="switchScreen('dashboard')">Dashboard</button>
+    <button role="tab" class="tab" data-screen="preship" onclick="switchScreen('preship')">Pre-Ship Scan</button>
+    <button role="tab" class="tab" data-screen="field" onclick="switchScreen('field')">Field Monitor</button>
+    <button role="tab" class="tab" data-screen="drift" onclick="switchScreen('drift')">Drift Analysis</button>
+    <button role="tab" class="tab" data-screen="timeline" onclick="switchScreen('timeline')">Event Timeline</button>
+    <button role="tab" class="tab" data-screen="diff" onclick="switchScreen('diff')">Firmware Diff</button>
+    <button role="tab" class="tab" data-screen="integrations" onclick="switchScreen('integrations')">Integrations</button>
+    <button role="tab" class="tab" data-screen="onboard" onclick="switchScreen('onboard')">Onboarding</button>
+  </div>
+
+  <!-- Screens injected by JS -->
+  <div id="screensContainer"></div>
+</main>
+
+<!-- CLI PANEL -->
+<div class="cli-overlay" id="cliOverlay" aria-hidden="true"></div>
+<aside class="cli-panel" id="cliPanel" role="complementary" aria-label="CLI Panel" aria-hidden="true">
+  <div class="cli-panel-header">
+    <div class="cli-panel-title">
+      <i class="ph-bold ph-terminal-window"></i>
+      DiagIoT CLI
+      <span class="cli-version">v1.0.0</span>
+    </div>
+    <button class="cli-close-btn" id="cliCloseBtn" aria-label="Close CLI panel">
+      <i class="ph-bold ph-x"></i>
+    </button>
+  </div>
+  <div class="cli-output" id="cliOutput" aria-live="polite" aria-label="CLI output"></div>
+  <div class="cli-input-row">
+    <span class="cli-prompt">diagiot &gt;</span>
+    <input type="text" class="cli-input" id="cliInput" autocomplete="off" spellcheck="false"
+      placeholder="Type a command or 'help'…" aria-label="CLI input">
+    <button class="cli-run-btn" id="cliRunBtn" aria-label="Run command">
+      <i class="ph-bold ph-paper-plane-right"></i>
+    </button>
+  </div>
+  <div class="cli-quickcmds">
+    <button onclick="cliRunQuick('help')">help</button>
+    <button onclick="cliRunQuick('fleet status')">fleet status</button>
+    <button onclick="cliRunQuick('scan run --target fw-v3.8.2-rc4')">scan run</button>
+    <button onclick="cliRunQuick('drift score --device AB-M7-5501')">drift score</button>
+    <button onclick="cliRunQuick('alerts list')">alerts list</button>
+    <button onclick="cliRunQuick('integrations list')">integrations</button>
+  </div>
+</aside>
+
+<div class="frame-label">DiagIoT · Web + CLI · 10 Screens · 3 Agents</div>
+
+<script src="app.js"></script>
+</body>
+</html>
