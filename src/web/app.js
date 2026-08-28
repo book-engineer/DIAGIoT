@@ -11,16 +11,11 @@ const AGENT_MAP = {
   dashboard:    'neutral',
   integrations: 'neutral',
 };
-
-// ── Screen HTML builders ──
 const SCREENS = {};
-
-// ─── DASHBOARD ───────────────────────────────────────────
 SCREENS.dashboard = () => `
 <div class="screen active" id="screen-dashboard">
   <div class="page-title">System Health Dashboard</div>
   <div class="page-sub">Real-time overview of all IoT fleets under DiagIoT surveillance — powered by autonomous drift agents</div>
-
   <div class="grid4" style="margin-bottom:16px">
     <div class="card stat">
       <div class="stat-num" style="color:var(--ok)">1,247</div>
@@ -39,7 +34,6 @@ SCREENS.dashboard = () => `
       <div class="stat-label"><i class="ph-bold ph-activity"></i> Fleet Uptime</div>
     </div>
   </div>
-
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px">
     <div class="agent-card preship">
       <div class="agent-card-icon"><i class="ph-bold ph-shield-check" style="color:var(--preship)"></i></div>
@@ -63,7 +57,6 @@ SCREENS.dashboard = () => `
       <div class="agent-metrics"><div>Modules: <strong>12</strong></div><div>Articles: <strong>6</strong></div><div>Completion: <strong>72%</strong></div></div>
     </div>
   </div>
-
   <div class="grid2" style="margin-bottom:16px">
     <div class="card">
       <div class="card-title"><i class="ph-bold ph-chart-bar"></i> Drift Trend — Last 30 Days</div>
@@ -83,7 +76,6 @@ SCREENS.dashboard = () => `
       </div>
     </div>
   </div>
-
   <div class="split-wide" style="margin-bottom:16px">
     <div class="card">
       <div class="card-title"><i class="ph-bold ph-stack"></i> System Registry — Current &amp; Past</div>
@@ -167,7 +159,6 @@ SCREENS.dashboard = () => `
       </div>
     </div>
   </div>
-
   <div class="card">
     <div class="card-title"><i class="ph-bold ph-bell-ringing"></i> Recent Alerts</div>
     <table class="wtable">
@@ -182,3 +173,421 @@ SCREENS.dashboard = () => `
     </table>
   </div>
 </div>`;
+let meshCanvas = null;
+let meshCtx = null;
+let meshNodes = [];
+let meshAnimId = null;
+let mousePos = { x: -1000, y: -1000 };
+function initLandingCanvas() {
+  meshCanvas = document.getElementById('landingMeshCanvas');
+  if (!meshCanvas) return;
+  meshCtx = meshCanvas.getContext('2d');
+  function resize() {
+    if (!meshCanvas) return;
+    meshCanvas.width = meshCanvas.parentElement.clientWidth || window.innerWidth;
+    meshCanvas.height = meshCanvas.parentElement.clientHeight || window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  window.addEventListener('mousemove', function(e) {
+    const rect = meshCanvas.getBoundingClientRect();
+    mousePos.x = e.clientX - rect.left;
+    mousePos.y = e.clientY - rect.top;
+  });
+  const nodeCount = Math.min(50, Math.floor(window.innerWidth / 28));
+  meshNodes = [];
+  const palette = ['#3dada8', '#5b7fd4', '#3ebd8c', '#d4922a'];
+  for (let i = 0; i < nodeCount; i++) {
+    meshNodes.push({
+      x: Math.random() * meshCanvas.width,
+      y: Math.random() * meshCanvas.height,
+      vx: (Math.random() - 0.5) * 0.7,
+      vy: (Math.random() - 0.5) * 0.7,
+      radius: Math.random() * 2.5 + 2,
+      color: palette[i % palette.length],
+      pulse: Math.random() * Math.PI,
+      pulseSpeed: 0.03 + Math.random() * 0.02
+    });
+  }
+  function render() {
+    if (!meshCtx || !meshCanvas) return;
+    meshCtx.clearRect(0, 0, meshCanvas.width, meshCanvas.height);
+    for (let i = 0; i < meshNodes.length; i++) {
+      const n1 = meshNodes[i];
+      n1.x += n1.vx;
+      n1.y += n1.vy;
+      n1.pulse += n1.pulseSpeed;
+      if (n1.x < 0 || n1.x > meshCanvas.width) n1.vx *= -1;
+      if (n1.y < 0 || n1.y > meshCanvas.height) n1.vy *= -1;
+      const dxM = mousePos.x - n1.x;
+      const dyM = mousePos.y - n1.y;
+      const distM = Math.sqrt(dxM * dxM + dyM * dyM);
+      if (distM < 120) {
+        n1.x -= (dxM / distM) * 0.8;
+        n1.y -= (dyM / distM) * 0.8;
+      }
+      for (let j = i + 1; j < meshNodes.length; j++) {
+        const n2 = meshNodes[j];
+        const dx = n1.x - n2.x;
+        const dy = n1.y - n2.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 130) {
+          const alpha = (1 - dist / 130) * 0.25;
+          meshCtx.beginPath();
+          meshCtx.moveTo(n1.x, n1.y);
+          meshCtx.lineTo(n2.x, n2.y);
+          meshCtx.strokeStyle = 'rgba(91, 127, 212, ' + alpha + ')';
+          meshCtx.lineWidth = 1;
+          meshCtx.stroke();
+        }
+      }
+      const pRadius = n1.radius + Math.sin(n1.pulse) * 1.5;
+      meshCtx.beginPath();
+      meshCtx.arc(n1.x, n1.y, Math.max(1, pRadius), 0, Math.PI * 2);
+      meshCtx.fillStyle = n1.color;
+      meshCtx.fill();
+    }
+    meshAnimId = requestAnimationFrame(render);
+  }
+  if (meshAnimId) cancelAnimationFrame(meshAnimId);
+  render();
+}
+let sandboxWaveCanvas = null;
+let sandboxWaveCtx = null;
+let sandboxScenario = 'heap';
+let sandboxNoise = 42;
+let sandboxThresh = 35;
+let sandboxTime = 0;
+let sandboxSpike = 0;
+let sandboxAnimId = null;
+const SCENARIOS = {
+  heap: {
+    name: 'Firmware Heap Creep',
+    agent: 'Pre-Ship & Monitor Agents',
+    status: 'Surveillance Active',
+    logs: [
+      { tag: 'PRE-SHIP', type: 'preship', text: 'Tracking dynamic heap allocation pool in firmware build v3.8.2-rc4' },
+      { tag: 'MONITOR', type: 'monitor', text: 'Heap fragmentation slope +0.42KB/hr detected on worker task #2' },
+      { tag: 'OK', type: 'ok', text: 'Baseline comparison: Golden target max allowable heap variance is 0.05%' }
+    ]
+  },
+  jitter: {
+    name: 'Clock Jitter & Drift',
+    agent: 'Field Monitor Agent',
+    status: 'Real-time Frequency Lock',
+    logs: [
+      { tag: 'MONITOR', type: 'monitor', text: 'Crystal oscillator PLL sync drift detected on Node AB-M7-5501' },
+      { tag: 'WARN', type: 'warn', text: 'Phase accumulator delta reached 14.8 PPM (threshold: 10.0 PPM)' },
+      { tag: 'OK', type: 'ok', text: 'Automated calibration offset recommended: 0x004F register trim' }
+    ]
+  },
+  packet: {
+    name: 'CAN Bus Frame Drop',
+    agent: 'Investigate Agent',
+    status: 'Bus Diagnostic Engine Active',
+    logs: [
+      { tag: 'MONITOR', type: 'monitor', text: 'Monitoring automotive CAN 2.0B bus arbitration on Interface can0' },
+      { tag: 'DANGER', type: 'danger', text: 'Intermittent CRC error bursts detected on Frame ID 0x3A4 (Payload: Telemetry)' },
+      { tag: 'WARN', type: 'warn', text: 'Bus load variance 68.4% during transmit bursts. Generating test harness' }
+    ]
+  }
+};
+function initSandbox() {
+  sandboxWaveCanvas = document.getElementById('sandboxWaveformCanvas');
+  if (!sandboxWaveCanvas) return;
+  sandboxWaveCtx = sandboxWaveCanvas.getContext('2d');
+  function resize() {
+    if (!sandboxWaveCanvas) return;
+    sandboxWaveCanvas.width = sandboxWaveCanvas.parentElement.clientWidth || 600;
+    sandboxWaveCanvas.height = sandboxWaveCanvas.parentElement.clientHeight || 220;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  selectSandboxScenario('heap');
+  function render() {
+    if (!sandboxWaveCtx || !sandboxWaveCanvas) return;
+    const w = sandboxWaveCanvas.width;
+    const h = sandboxWaveCanvas.height;
+    sandboxWaveCtx.fillStyle = '#0c0e16';
+    sandboxWaveCtx.fillRect(0, 0, w, h);
+    sandboxWaveCtx.strokeStyle = '#1e2230';
+    sandboxWaveCtx.lineWidth = 1;
+    for (let y = 30; y < h; y += 30) {
+      sandboxWaveCtx.beginPath();
+      sandboxWaveCtx.moveTo(0, y);
+      sandboxWaveCtx.lineTo(w, y);
+      sandboxWaveCtx.stroke();
+    }
+    const baselineY = h / 2;
+    sandboxWaveCtx.strokeStyle = 'rgba(62, 189, 140, 0.4)';
+    sandboxWaveCtx.setLineDash([4, 4]);
+    sandboxWaveCtx.beginPath();
+    sandboxWaveCtx.moveTo(0, baselineY);
+    sandboxWaveCtx.lineTo(w, baselineY);
+    sandboxWaveCtx.stroke();
+    sandboxWaveCtx.setLineDash([]);
+    const threshDelta = (sandboxThresh / 100) * (h / 2.5);
+    sandboxWaveCtx.strokeStyle = 'rgba(201, 84, 104, 0.4)';
+    sandboxWaveCtx.setLineDash([2, 4]);
+    sandboxWaveCtx.beginPath();
+    sandboxWaveCtx.moveTo(0, baselineY - threshDelta);
+    sandboxWaveCtx.lineTo(w, baselineY - threshDelta);
+    sandboxWaveCtx.moveTo(0, baselineY + threshDelta);
+    sandboxWaveCtx.lineTo(w, baselineY + threshDelta);
+    sandboxWaveCtx.stroke();
+    sandboxWaveCtx.setLineDash([]);
+    sandboxWaveCtx.beginPath();
+    sandboxWaveCtx.strokeStyle = '#5b7fd4';
+    sandboxWaveCtx.lineWidth = 2;
+    const noiseFactor = sandboxNoise / 100;
+    sandboxTime += 0.04;
+    if (sandboxSpike > 0) sandboxSpike -= 0.015;
+    for (let x = 0; x < w; x += 3) {
+      const t = sandboxTime + x * 0.02;
+      let yOffset = Math.sin(t) * 28 + Math.sin(t * 2.3) * 12 * noiseFactor;
+      yOffset += (Math.random() - 0.5) * 10 * noiseFactor;
+      if (x > w * 0.6 && x < w * 0.85 && sandboxSpike > 0) {
+        yOffset += Math.sin((x - w * 0.6) * 0.08) * 65 * sandboxSpike;
+      }
+      const y = baselineY + yOffset;
+      if (x === 0) sandboxWaveCtx.moveTo(x, y);
+      else sandboxWaveCtx.lineTo(x, y);
+    }
+    sandboxWaveCtx.stroke();
+    sandboxAnimId = requestAnimationFrame(render);
+  }
+  if (sandboxAnimId) cancelAnimationFrame(sandboxAnimId);
+  render();
+}
+function selectSandboxScenario(scenarioKey) {
+  sandboxScenario = scenarioKey;
+  const btns = document.querySelectorAll('.sandbox-scenario-btn');
+  btns.forEach(function(btn) {
+    const isTarget = btn.getAttribute('data-scenario') === scenarioKey;
+    btn.classList.toggle('active', isTarget);
+    btn.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+  });
+  const sc = SCENARIOS[scenarioKey];
+  const agentStatusEl = document.getElementById('sandboxAgentStatus');
+  if (agentStatusEl && sc) agentStatusEl.textContent = 'Agent: ' + sc.agent + ' (' + sc.status + ')';
+  const logsEl = document.getElementById('sandboxLogs');
+  if (logsEl && sc) {
+    logsEl.innerHTML = '';
+    sc.logs.forEach(function(log) { appendSandboxLog(log.tag, log.type, log.text); });
+  }
+}
+function updateSandboxParams() {
+  const nSlider = document.getElementById('noiseSlider');
+  const tSlider = document.getElementById('threshSlider');
+  const nVal = document.getElementById('noiseVal');
+  const tVal = document.getElementById('threshVal');
+  if (nSlider && nVal) {
+    sandboxNoise = parseInt(nSlider.value, 10);
+    nVal.textContent = sandboxNoise + '%';
+  }
+  if (tSlider && tVal) {
+    sandboxThresh = parseInt(tSlider.value, 10);
+    tVal.textContent = (sandboxThresh / 100).toFixed(2) + ' sigma';
+  }
+}
+function appendSandboxLog(tag, type, message) {
+  const logsEl = document.getElementById('sandboxLogs');
+  if (!logsEl) return;
+  const row = document.createElement('div');
+  row.className = 'console-log-row';
+  const now = new Date();
+  const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
+  row.innerHTML = '<span class="console-time">[' + timeStr + ']</span>' +
+    '<span class="console-tag ' + type + '">[' + tag + ']</span>' +
+    '<span>' + message + '</span>';
+  logsEl.appendChild(row);
+  logsEl.scrollTop = logsEl.scrollHeight;
+}
+function triggerSandboxAnomaly() {
+  sandboxSpike = 1.0;
+  appendSandboxLog('ANOMALY', 'danger', 'Burst anomaly injected into active stream. Threshold exceeded.');
+  setTimeout(function() {
+    appendSandboxLog('ISOLATION', 'warn', 'Autonomous agent isolated drift root-cause to commit 7b19a2f on branch main.');
+  }, 280);
+  setTimeout(function() {
+    appendSandboxLog('REMEDY', 'ok', 'Golden state remediation patch calculated. Zero downtime required.');
+  }, 560);
+}
+function resetSandbox() {
+  sandboxSpike = 0;
+  appendSandboxLog('RESET', 'ok', 'Telemetry stream reset to immutable golden baseline standards.');
+}
+
+
+
+function _authSetStatus(type, msg) {
+  const box  = document.getElementById('authStatusBox');
+  const text = document.getElementById('authStatusText');
+  if (!box) return;
+  box.className = 'auth-status-box ' + (type || '');
+  if (text) text.textContent = msg || '';
+}
+function openAuthModal() {
+  const modal = document.getElementById('authModalBackdrop');
+  if (!modal) return;
+  modal.classList.add('open');
+  const emailInput = document.getElementById('authEmail');
+  if (emailInput) setTimeout(function() { emailInput.focus(); }, 60);
+}
+function closeAuthModal() {
+  const modal = document.getElementById('authModalBackdrop');
+  if (!modal) return;
+  modal.classList.remove('open');
+}
+function selectAuthRole(roleKey) {
+  const chips = document.querySelectorAll('.role-chip');
+  chips.forEach(function(c) {
+    const isTarget = c.getAttribute('data-role') === roleKey;
+    c.classList.toggle('active', isTarget);
+    c.setAttribute('aria-checked', isTarget ? 'true' : 'false');
+  });
+}
+async function submitAuthLaunch() {
+  const emailInput = document.getElementById('authEmail');
+  const keyInput   = document.getElementById('authKey');
+  const submitBtn  = document.getElementById('authSubmitBtn');
+  const email    = emailInput ? emailInput.value.trim() : '';
+  const password = keyInput   ? keyInput.value.trim()   : '';
+  if (!email || !email.includes('@')) {
+    _authSetStatus('error', 'Please enter a valid work email address.');
+    return;
+  }
+  if (!password || password.length < 6) {
+    _authSetStatus('error', 'Password must be at least 6 characters.');
+    return;
+  }
+  if (submitBtn) submitBtn.disabled = true;
+  _authSetStatus('verifying', 'Authenticating with Supabase...');
+
+  if (window._sbInitPromise) await window._sbInitPromise;
+  if (!window.SB) {
+
+    _authSetStatus('success', 'No-auth mode — launching workspace...');
+    setTimeout(function() {
+      closeAuthModal();
+      if (submitBtn) submitBtn.disabled = false;
+      _applySessionUser({ email: email, id: 'local' });
+      enterDashboard();
+    }, 400);
+    return;
+  }
+  try {
+    const { data, error } = await window.SB.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    const user = data.user || data.session?.user;
+    _authSetStatus('success', 'Authenticated. Launching workspace...');
+    setTimeout(function() {
+      closeAuthModal();
+      if (submitBtn) submitBtn.disabled = false;
+      _applySessionUser(user);
+      enterDashboard();
+    }, 380);
+  } catch (err) {
+    if (submitBtn) submitBtn.disabled = false;
+    _authSetStatus('error', err.message || 'Authentication failed — please check your credentials.');
+  }
+}
+function _applySessionUser(user) {
+  if (!user) return;
+
+  const email   = user.email || '';
+  const nameParts = email.split('@')[0].split(/[._-]/);
+  const initials = nameParts.length >= 2
+    ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
+    : email.slice(0, 2).toUpperCase();
+  const avatar = document.getElementById('topbarAvatar');
+  if (avatar) {
+    avatar.textContent = initials;
+    avatar.setAttribute('aria-label', 'Authenticated user: ' + email);
+    avatar.title = email;
+  }
+  const signOutBtn = document.getElementById('signOutBtn');
+  if (signOutBtn) signOutBtn.style.display = '';
+
+  window._authUser = user;
+}
+async function authSignOut() {
+  if (window.SB) {
+    try { await window.SB.auth.signOut(); } catch {  }
+  }
+  window._authUser = null;
+  const avatar = document.getElementById('topbarAvatar');
+  if (avatar) { avatar.textContent = '--'; avatar.title = ''; }
+  const signOutBtn = document.getElementById('signOutBtn');
+  if (signOutBtn) signOutBtn.style.display = 'none';
+  exitToLanding();
+}
+function enterDashboard() {
+  document.body.classList.add('dashboard-active');
+  const landing = document.getElementById('landingPage');
+  const app = document.getElementById('appInterface');
+  if (landing) landing.style.display = 'none';
+  if (app) {
+    app.style.display = 'block';
+    app.setAttribute('aria-hidden', 'false');
+  }
+  if (typeof connectWS === 'function' && !window.D?.connected) {
+    connectWS();
+  }
+  switchScreen('dashboard');
+  if (typeof initCLI === 'function') {
+    initCLI();
+  }
+}
+function exitToLanding() {
+  document.body.classList.remove('dashboard-active');
+  const landing = document.getElementById('landingPage');
+  const app = document.getElementById('appInterface');
+  if (landing) landing.style.display = 'block';
+  if (app) {
+    app.style.display = 'none';
+    app.setAttribute('aria-hidden', 'true');
+  }
+  initLandingCanvas();
+  initSandbox();
+}
+function dismissPrivacyBanner() {
+  const b = document.getElementById('privacyBanner');
+  if (b) b.classList.add('hidden');
+  try {
+    localStorage.setItem('diagiot_privacy_ack', 'true');
+  } catch (e) {}
+}
+window.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeAuthModal();
+  }
+  if (e.shiftKey && e.key === '?') {
+    const btn = document.getElementById('cliPanelBtn');
+    if (btn) btn.click();
+  }
+});
+window.addEventListener('DOMContentLoaded', function() {
+  try {
+    if (localStorage.getItem('diagiot_privacy_ack') === 'true') {
+      dismissPrivacyBanner();
+    }
+  } catch (e) {}
+  initLandingCanvas();
+  initSandbox();
+  if (window.location.hash && window.location.hash !== '#landingHero' && window.location.hash !== '#sandbox' && window.location.hash !== '#agents' && window.location.hash !== '#compliance' && window.location.hash !== '#testimonials') {
+    const targetScreen = window.location.hash.replace('#', '');
+    if (AGENT_MAP[targetScreen]) {
+      enterDashboard();
+      switchScreen(targetScreen);
+    }
+  }
+});
+
+function launchScreen(screenId) {
+  enterDashboard();
+  if (typeof switchScreen === 'function') {
+    switchScreen(screenId);
+  }
+}
+window.launchScreen = launchScreen;
