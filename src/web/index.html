@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DiagIoT — Autonomous Drift Detection Platform</title>
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+<script>
+(function(){
+  const DEFAULT_BASE = (window.DIAGIOT_SERVER || 'http://localhost:3000').replace(/\/$/,'');
+  class DiagIoTClient {
+    constructor(base){ this.base=(base||DEFAULT_BASE).replace(/\/$/,''); }
+    async _fetch(path,opts={}){
+      const url=`${this.base}/api${path}`;
+      const res=await fetch(url,{headers:{'Content-Type':'application/json',...(opts.headers||{})},...opts});
+      if(!res.ok){const b=await res.text();throw new Error(`API ${opts.method||'GET'} ${path} HTTP ${res.status}: ${b}`);}
+      return res.json();
+    }
+    get(p){return this._fetch(p);}
+    post(p,b){return this._fetch(p,{method:'POST',body:JSON.stringify(b)});}
+    fleetSummary(){return this.get('/fleet/summary');}
+    fleetDevices(q={}){return this.get('/fleet/devices'+toQs(q));}
+    fleetDevice(id){return this.get(`/fleet/devices/${encodeURIComponent(id)}`);}
+    deviceTelemetry(id,l){return this.get(`/fleet/devices/${encodeURIComponent(id)}/telemetry${l?`?limit=${l}`:''}`);}
+    alerts(q={}){return this.get('/alerts'+toQs(q));}
+    acknowledgeAlert(id,user){return this.post(`/alerts/${encodeURIComponent(id)}/acknowledge`,{user});}
+    scans(){return this.get('/scans');}
+    latestScan(t){return this.get(`/scans/latest${t?`?target=${encodeURIComponent(t)}`:''}`).catch(()=>null);}
+    runScan(t,c,s){return this.post('/scans/run',{target:t,checks:c,scores:s});}
+    baseline(id){return this.get(`/baselines/${encodeURIComponent(id)}`).catch(()=>null);}
+    captureBaseline(id,r,tag){return this.post(`/baselines/${encodeURIComponent(id)}/capture`,{readings:r,tag});}
+    agents(){return this.get('/agents');}
+    integrations(){return this.get('/integrations');}
+    knowledge(q){return this.get(`/knowledge${q?`?q=${encodeURIComponent(q)}`:''}`).catch(()=>[]);}
+    incidents(){return this.get('/incidents').catch(()=>[]);}
+    health(){return this.get('/health');}
+  }
+  function toQs(o){const e=Object.entries(o).filter(([,v])=>v!=null);return e.length?'?'+e.map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join('&'):'';}
+  window.DiagIoTClient=DiagIoTClient;
+  window.api=new DiagIoTClient();
+})();
+</script>
+</head>
+<body>
+
+<a href="#landingMain" class="skip-link">Skip to main content</a>
+
+<div class="landing-page" id="landingPage">
+  <header class="landing-header" role="banner">
+    <div class="landing-nav-container">
+      <a href="#landingHero" class="brand-link" aria-label="DiagIoT Platform Home">
+        <div class="brand-icon-box">
+          <i class="ph-bold ph-cpu" aria-hidden="true"></i>
+        </div>
+        <span>DiagIoT</span>
+        <span class="brand-tagline">Agentic Drift Engine</span>
+      </a>
+
+      <nav class="landing-nav-links" aria-label="Primary site navigation">
+        <a href="#agents" class="landing-nav-item">Autonomous Agents</a>
+        <a href="#sandbox" class="landing-nav-item">Live Simulator</a>
+        <a href="#architecture" class="landing-nav-item">Edge Architecture</a>
+        <a href="#testimonials" class="landing-nav-item">Field Verification</a>
+      </nav>
+
+      <div class="landing-nav-actions">
+        <div class="status-pill-nav" aria-label="Telemetry Network Status: 1,247 Nodes Online">
+          <span class="pulse-dot teal"></span>
+          <span>1,247 Nodes Synced</span>
+        </div>
+        <button class="btn btn-primary" id="landingNavLaunchBtn" onclick="openAuthModal()" aria-label="Open Launch Dashboard Modal">
+          <i class="ph-bold ph-sign-in" aria-hidden="true"></i>
+          <span>Launch Dashboard</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="landingMain">
+    <section class="landing-hero" id="landingHero" aria-label="Hero Overview">
+      <canvas id="landingMeshCanvas" class="hero-canvas-bg" aria-hidden="true"></canvas>
+      <div class="hero-content">
+        <div class="hero-pill">
+          <span class="hero-pill-icon"><i class="ph-bold ph-shield-check" aria-hidden="true"></i></span>
+          <span>Embedded Systems &middot; Firmware Verification &middot; Fleet Drift Isolation</span>
+        </div>
+
+        <h1 class="hero-title">
+          Autonomous Drift Detection for <br>
+          <span class="hero-title-highlight">Mission-Critical IoT Fleets</span>
+        </h1>
+
+        <p class="hero-subtitle">
+          Built for embedded engineers, QA leads, and fleet operators. Eliminate midnight telemetry panics with autonomous agents that detect heap leaks, clock skew, and peripheral anomalies before shipment and across production field nodes.
+        </p>
+
+        <div class="hero-actions">
+          <button class="btn-hero-primary" onclick="openAuthModal()" aria-label="Launch Live Fleet Dashboard">
+            <i class="ph-bold ph-squares-four" aria-hidden="true"></i>
+            <span>Launch Live Dashboard</span>
+          </button>
+          <a href="#sandbox" class="btn-hero-secondary" aria-label="Explore Interactive Anomaly Sandbox">
+            <i class="ph-bold ph-waveform" aria-hidden="true"></i>
+            <span>Interactive Drift Sandbox</span>
+          </a>
+        </div>
+
+        <div class="hero-metrics-strip" role="region" aria-label="Key Performance Indicators">
+          <div class="metric-card">
+            <div class="metric-value preship-color">
+              <i class="ph-bold ph-shield-check" aria-hidden="true"></i>
+              <span>99.4%</span>
+            </div>
+            <div class="metric-title">Pre-Ship Drift Interception</div>
+            <div class="metric-desc">Catches firmware regressions and memory creep prior to factory flashing.</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-value monitor-color">
+              <i class="ph-bold ph-timer" aria-hidden="true"></i>
+              <span>4.2x</span>
+            </div>
+            <div class="metric-title">Accelerated Root-Cause Isolation</div>
+            <div class="metric-desc">Autonomous telemetry correlation matches anomalies to source commits in seconds.</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-value ok-color">
+              <i class="ph-bold ph-cpu" aria-hidden="true"></i>
+              <span>&lt; 12KB</span>
+            </div>
+            <div class="metric-title">Ultra-Lightweight Edge Footprint</div>
+            <div class="metric-desc">Compiled natively for ARM Cortex-M, RISC-V, and bare-metal RTOS runtimes.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-container" id="sandbox" aria-label="Interactive Diagnostic Sandbox">
+      <div class="section-header">
+        <span class="section-badge monitor">Interactive Simulation</span>
+        <h2 class="section-title">Live Telemetry &amp; Drift Sandbox</h2>
+        <p class="section-subtitle">
+          Test how autonomous agents detect, isolate, and prescribe fixes for real-world IoT anomalies in real time without human intervention.
+        </p>
+      </div>
+
+      <div class="sandbox-card">
+        <div class="sandbox-toolbar">
+          <div class="sandbox-scenarios" role="tablist" aria-label="Drift Scenarios">
+            <button class="sandbox-scenario-btn active" data-scenario="heap" onclick="selectSandboxScenario('heap')" role="tab" aria-selected="true">
+              <i class="ph-bold ph-memory" aria-hidden="true"></i>
+              <span>Firmware Heap Creep</span>
+            </button>
+            <button class="sandbox-scenario-btn" data-scenario="jitter" onclick="selectSandboxScenario('jitter')" role="tab" aria-selected="false">
+              <i class="ph-bold ph-clock" aria-hidden="true"></i>
+              <span>Clock Jitter &amp; Drift</span>
+            </button>
+            <button class="sandbox-scenario-btn" data-scenario="packet" onclick="selectSandboxScenario('packet')" role="tab" aria-selected="false">
+              <i class="ph-bold ph-broadcast" aria-hidden="true"></i>
+              <span>CAN Bus Frame Drop</span>
+            </button>
+          </div>
+
+          <div class="sandbox-status-chip">
+            <span class="pulse-dot blue"></span>
+            <span id="sandboxAgentStatus">Agent: Autonomous Monitor Active</span>
+          </div>
+        </div>
+
+        <div class="sandbox-grid">
+          <div class="sandbox-controls">
+            <div class="control-group-title">Simulation Parameters</div>
+
+            <div class="slider-container">
+              <div class="slider-header">
+                <span>Signal Anomaly Magnitude</span>
+                <span class="slider-val" id="noiseVal">42%</span>
+              </div>
+              <input type="range" min="0" max="100" value="42" class="custom-range" id="noiseSlider" oninput="updateSandboxParams()" aria-label="Signal Anomaly Magnitude">
+            </div>
+
+            <div class="slider-container">
+              <div class="slider-header">
+                <span>Drift Detection Threshold</span>
+                <span class="slider-val" id="threshVal">0.35 sigma</span>
+              </div>
+              <input type="range" min="10" max="90" value="35" class="custom-range" id="threshSlider" oninput="updateSandboxParams()" aria-label="Drift Detection Threshold">
+            </div>
+
+            <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px;">
+              <button class="btn btn-primary" onclick="triggerSandboxAnomaly()" aria-label="Inject Synthetic Drift Burst">
+                <i class="ph-bold ph-lightning" aria-hidden="true"></i>
+                <span>Inject Anomaly Burst</span>
+              </button>
+              <button class="btn btn-ghost" onclick="resetSandbox()" aria-label="Reset Simulation to Baseline">
+                <i class="ph-bold ph-arrows-clockwise" aria-hidden="true"></i>
+                <span>Reset to Golden Baseline</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="sandbox-visualizer">
+            <div class="waveform-viewport">
+              <canvas id="sandboxWaveformCanvas" class="waveform-canvas" aria-label="Real-time telemetry waveform canvas"></canvas>
+            </div>
+            <div class="sandbox-console" id="sandboxLogs" aria-live="polite" aria-label="Agent Diagnostic Event Log"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-container" id="agents" aria-label="Autonomous Agents">
+      <div class="section-header">
+        <span class="section-badge preship">Autonomous Intelligence</span>
+        <h2 class="section-title">Three Specialized Diagnostic Agents</h2>
+        <p class="section-subtitle">
+          Engineered with strict separation of concerns to protect your devices from pre-shipment regressions all the way through long-term field deployment.
+        </p>
+      </div>
+
+      <div class="agents-grid">
+        <article class="landing-agent-card preship">
+          <div class="agent-icon-wrap preship">
+            <i class="ph-bold ph-shield-check" aria-hidden="true"></i>
+          </div>
+          <h3 class="agent-card-heading">Pre-Ship Scan Agent</h3>
+          <div class="agent-card-subheading">CI/CD Gatekeeper &middot; Baseline Comparison</div>
+          <p class="agent-card-description">
+            Executes automated hardware-in-the-loop scans during firmware builds. Compares telemetry against immutable golden baselines and blocks flashing on statistical variance.
+          </p>
+          <ul class="agent-feature-list">
+            <li class="agent-feature-item">
+              <i class="ph-bold ph-check agent-feature-icon preship" aria-hidden="true"></i>
+              <span>Automated static &amp; dynamic ELF memory analysis</span>
+            </li>
+            <li class="agent-feature-item">
+              <i class="ph-bold ph-check agent-feature-icon preship" aria-hidden="true"></i>
+              <span>Hardware-in-the-loop serial and JTAG verification</span>
+            </li>
+            <li class="agent-feature-item">
+              <i class="ph-bold ph-check agent-feature-icon preship" aria-hidden="true"></i>
+              <span>Zero-touch Jenkins and GitHub Actions gatekeeper</span>
+            </li>
+          </ul>
+        </article>
+
+        <article class="landing-agent-card monitor">
+          <div class="agent-icon-wrap monitor">
+            <i class="ph-bold ph-eye" aria-hidden="true"></i>
+          </div>
+          <h3 class="agent-card-heading">Field Monitor &amp; Investigate</h3>
+          <div class="agent-card-subheading">Continuous Telemetry &middot; Root Cause Engine</div>
+          <p class="agent-card-description">
+            Maintains continuous statistical surveillance across deployed fleets. Automatically isolates anomalous clusters, correlates git commits, and generates reproduction scripts.
+          </p>
+          <ul class="agent-feature-list">
+            <li class="agent-feature-item">
+              <i class="ph-bold ph-check agent-feature-icon monitor" aria-hidden="true"></i>
+              <span>Sub-second anomaly recognition and drift scoring</span>
+            </li>
+            <li class="agent-feature-item">
+              <i class="ph-bold ph-check agent-feature-icon monitor" aria-hidden="true"></i>
+              <span>Automated firmware diff with suspect commit flagging</span>
+            </li>
+            <li class="agent-feature-item">
+              <i class="ph-bold ph-check agent-feature-icon monitor" aria-hidden="true"></i>
+              <span>One-click test harness reproduction generator</span>
+            </li>
+          </ul>
+        </article>
+
+        <article class="landing-agent-card onboard">
+          <div class="agent-icon-wrap onboard">
+            <i class="ph-bold ph-compass" aria-hidden="true"></i>
+          </div>
+          <h3 class="agent-card-heading">Onboarding &amp; Knowledge</h3>
+          <div class="agent-card-subheading">Contextual Guidance &middot; Incident Memory</div>
+          <p class="agent-card-description">
+            Accelerates embedded engineer onboarding from weeks to hours. Provides semantic search across past post-mortems, hardware schematics, and platform debugging workflows.
+          </p>
+          <ul class="agent-feature-list">
+            <li class="agent-feature-item">
+              <i class="ph-bold ph-check agent-feature-icon onboard" aria-hidden="true"></i>
+              <span>Interactive 4-stage engineering walkthrough tracks</span>
+            </li>
+            <li class="agent-feature-item">
+              <i class="ph-bold ph-check agent-feature-icon onboard" aria-hidden="true"></i>
+              <span>Indexed historical incident knowledge graph</span>
+            </li>
+            <li class="agent-feature-item">
+              <i class="ph-bold ph-check agent-feature-icon onboard" aria-hidden="true"></i>
+              <span>Curated toolchain and SDK setup automation</span>
+            </li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-container" id="architecture" aria-label="Deterministic Verification Architecture">
+      <div class="section-header">
+        <span class="section-badge neutral">Deterministic Execution</span>
+        <h2 class="section-title">Hardware-in-the-Loop Edge Architecture</h2>
+        <p class="section-subtitle">
+          Engineered for real-world embedded constraints. Zero cloud telemetry dependencies, cycle-accurate bus verification, and sub-millisecond edge arbitration.
+        </p>
+      </div>
+
+      <div class="compliance-grid">
+        <div class="compliance-card">
+          <div class="compliance-header">
+            <div class="compliance-icon"><i class="ph-bold ph-circuit-board" aria-hidden="true"></i></div>
+            <div>
+              <div class="compliance-name">Bare-Metal &amp; RTOS Instrumentation</div>
+              <div class="compliance-standard">Zero Bus Contention</div>
+            </div>
+          </div>
+          <div class="compliance-body">
+            Direct memory-mapped telemetry taps for FreeRTOS, Zephyr, and bare-metal targets. Real-time stack watermark profiling and interrupt jitter measurement with under 0.8% CPU overhead.
+          </div>
+        </div>
+
+        <div class="compliance-card">
+          <div class="compliance-header">
+            <div class="compliance-icon"><i class="ph-bold ph-git-branch" aria-hidden="true"></i></div>
+            <div>
+              <div class="compliance-name">Automated Git &amp; CI Gatekeeping</div>
+              <div class="compliance-standard">Immutable Golden Baselines</div>
+            </div>
+          </div>
+          <div class="compliance-body">
+            Hardware-in-the-loop test harnesses integrated with GitHub Actions, Jenkins, and GitLab CI. Flashing pipelines halt deterministically when firmware ELF symbols exceed calibrated drift variance.
+          </div>
+        </div>
+
+        <div class="compliance-card">
+          <div class="compliance-header">
+            <div class="compliance-icon"><i class="ph-bold ph-plugs-connected" aria-hidden="true"></i></div>
+            <div>
+              <div class="compliance-name">Multi-Protocol Bus Diagnostics</div>
+              <div class="compliance-standard">CAN 2.0B &middot; UART &middot; SPI &middot; I2C</div>
+            </div>
+          </div>
+          <div class="compliance-body">
+            Hardware adapter bridges supporting Arduino serial, Segger J-Link, Docker virtualized targets, and direct socket CAN interfaces for high-throughput packet inspection.
+          </div>
+        </div>
+
+        <div class="compliance-card">
+          <div class="compliance-header">
+            <div class="compliance-icon"><i class="ph-bold ph-shield-check" aria-hidden="true"></i></div>
+            <div>
+              <div class="compliance-name">Air-Gapped Telemetry Isolation</div>
+              <div class="compliance-standard">Strict On-Premises Security</div>
+            </div>
+          </div>
+          <div class="compliance-body">
+            Operates entirely on isolated factory networks and local device gateways. Zero external telemetry egress, cryptographic authentication tokens, and standardized RFC 8259 payload logs.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-container" id="pipeline" aria-label="End-to-End Diagnostic Pipeline">
+      <div class="section-header">
+        <span class="section-badge monitor">Autonomous Intelligence Flow</span>
+        <h2 class="section-title">End-to-End Diagnostic Pipeline</h2>
+        <p class="section-subtitle">
+          From bare-metal ring buffer capture to automated CI/CD gatekeeping &mdash; deterministic telemetry correlation with zero cloud overhead.
+        </p>
+      </div>
+
+      <div class="pipeline-grid">
+        <div class="pipeline-card">
+          <div class="pipeline-card-header">
+            <span class="pipeline-step-num">01</span>
+            <div class="pipeline-icon-wrap"><i class="ph-bold ph-cpu" aria-hidden="true"></i></div>
+          </div>
+          <div class="pipeline-card-title">Low-Overhead Hardware Tap</div>
+          <div class="pipeline-card-subtitle">SWD &middot; SEGGER RTT &middot; SocketCAN</div>
+          <p class="pipeline-card-desc">
+            Captures task switch latency, stack high-water marks, and bus frames with sub-12KB memory overhead and zero contention.
+          </p>
+          <div class="pipeline-tech-tag">Bare-Metal &middot; FreeRTOS &middot; Zephyr</div>
+        </div>
+
+        <div class="pipeline-card">
+          <div class="pipeline-card-header">
+            <span class="pipeline-step-num">02</span>
+            <div class="pipeline-icon-wrap"><i class="ph-bold ph-chart-line-up" aria-hidden="true"></i></div>
+          </div>
+          <div class="pipeline-card-title">Kalman Drift Engine</div>
+          <div class="pipeline-card-subtitle">Statistical Anomaly Scoring</div>
+          <p class="pipeline-card-desc">
+            Compares rolling telemetry windows against immutable golden baselines, computing real-time sigma scores across all fleet nodes.
+          </p>
+          <div class="pipeline-tech-tag">Kalman Filter &middot; 3-Sigma Threshold</div>
+        </div>
+
+        <div class="pipeline-card">
+          <div class="pipeline-card-header">
+            <span class="pipeline-step-num">03</span>
+            <div class="pipeline-icon-wrap"><i class="ph-bold ph-git-diff" aria-hidden="true"></i></div>
+          </div>
+          <div class="pipeline-card-title">ELF &amp; AST Diffing</div>
+          <div class="pipeline-card-subtitle">Commit &amp; Symbol Isolation</div>
+          <p class="pipeline-card-desc">
+            Disassembles target binaries and maps anomalous registers directly to source code commits and peripheral configuration changes.
+          </p>
+          <div class="pipeline-tech-tag">DWARF &middot; AST Graph &middot; Git Map</div>
+        </div>
+
+        <div class="pipeline-card">
+          <div class="pipeline-card-header">
+            <span class="pipeline-step-num">04</span>
+            <div class="pipeline-icon-wrap"><i class="ph-bold ph-books" aria-hidden="true"></i></div>
+          </div>
+          <div class="pipeline-card-title">Knowledge Graph Matching</div>
+          <div class="pipeline-card-subtitle">Autonomous Post-Mortem Index</div>
+          <p class="pipeline-card-desc">
+            Cross-references drift signatures against past fleet incidents and silicon errata to score root-cause hypotheses automatically.
+          </p>
+          <div class="pipeline-tech-tag">Vector Index &middot; Errata Database</div>
+        </div>
+
+        <div class="pipeline-card">
+          <div class="pipeline-card-header">
+            <span class="pipeline-step-num">05</span>
+            <div class="pipeline-icon-wrap"><i class="ph-bold ph-shield-check" aria-hidden="true"></i></div>
+          </div>
+          <div class="pipeline-card-title">Gate Action &amp; Repro Harness</div>
+          <div class="pipeline-card-subtitle">Zero-Touch CI/CD Gatekeeper</div>
+          <p class="pipeline-card-desc">
+            Blocks regressions before factory flashing, generates reproducible test scripts, and provides golden state remediation patches.
+          </p>
+          <div class="pipeline-tech-tag">GitHub Actions &middot; Jenkins Gate</div>
+        </div>
+      </div>
+
+      <div class="cta-banner">
+        <h3 class="cta-banner-title">Experience Autonomous Fleet Intelligence</h3>
+        <p class="cta-banner-desc">
+          Launch the live DiagIoT workspace with all 10 specialized screens, real-time WebSocket feeds, and embedded CLI controls ready for exploration.
+        </p>
+        <button class="btn-hero-primary" onclick="openAuthModal()" aria-label="Open Workspace Now">
+          <i class="ph-bold ph-arrow-right" aria-hidden="true"></i>
+          <span>Launch Live Dashboard</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="landing-footer" role="contentinfo">
+    <div class="footer-inner">
+      <div>
+        <div class="brand-link">
+          <div class="brand-icon-box">
+            <i class="ph-bold ph-cpu" aria-hidden="true"></i>
+          </div>
+          <span>DiagIoT</span>
+        </div>
+        <p class="footer-brand-desc">
+          Autonomous drift detection and agentic root-cause intelligence for next-generation connected device fleets.
+        </p>
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary" onclick="openAuthModal()" style="font-size:12px;padding:6px 14px;" aria-label="Launch Full Workspace">
+            <i class="ph-bold ph-sign-in" aria-hidden="true"></i>
+            <span>Launch Dashboard</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="footer-col-title">Diagnostic Workspaces</div>
+        <ul class="footer-links">
+          <li><a href="#preship" class="footer-link" onclick="requestWorkspaceAuth('preship', 'qa');return false;">Pre-Ship Scan &amp; Gate</a></li>
+          <li><a href="#field" class="footer-link" onclick="requestWorkspaceAuth('field', 'fleet');return false;">Fleet Field Monitor</a></li>
+          <li><a href="#drift" class="footer-link" onclick="requestWorkspaceAuth('drift', 'firmware');return false;">Statistical Drift Analysis</a></li>
+          <li><a href="#diff" class="footer-link" onclick="requestWorkspaceAuth('diff', 'firmware');return false;">Firmware Diff &amp; AST</a></li>
+          <li><a href="#timeline" class="footer-link" onclick="requestWorkspaceAuth('timeline', 'fleet');return false;">Event Timeline &amp; Root Cause</a></li>
+          <li><a href="#repro" class="footer-link" onclick="requestWorkspaceAuth('repro', 'qa');return false;">Harness Reproduction</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="footer-col-title">Toolchain &amp; Protocols</div>
+        <ul class="footer-links">
+          <li><a href="#hil" class="footer-link" onclick="openDoc('hil');return false;">Hardware-in-the-Loop Gate</a></li>
+          <li><a href="#bus" class="footer-link" onclick="openDoc('bus');return false;">CAN 2.0B &amp; Multi-Bus</a></li>
+          <li><a href="#rtos" class="footer-link" onclick="openDoc('rtos');return false;">Bare-Metal &amp; RTOS Taps</a></li>
+          <li><a href="#docker" class="footer-link" onclick="openDoc('docker');return false;">Virtual Fleet Engine</a></li>
+          <li><a href="#integrations" class="footer-link" onclick="requestWorkspaceAuth('integrations', 'fleet');return false;">Integration Hub</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="footer-col-title">Engineering Knowledge</div>
+        <ul class="footer-links">
+          <li><a href="#onboarding" class="footer-link" onclick="openDoc('onboarding');return false;">Engineer Onboarding Track</a></li>
+          <li><a href="#knowledge" class="footer-link" onclick="openDoc('knowledge');return false;">Incident Knowledge Base</a></li>
+          <li><a href="#cli" class="footer-link" onclick="openDoc('cli');return false;">DiagIoT CLI Reference</a></li>
+          <li><a href="#api" class="footer-link" onclick="openDoc('api');return false;">REST &amp; WebSocket APIs</a></li>
+          <li><a href="#security" class="footer-link" onclick="openDoc('security');return false;">Air-Gapped Telemetry Specs</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="footer-col-title">Live Telemetry Status</div>
+        <ul class="footer-links">
+          <li style="display:flex;align-items:center;gap:6px;color:var(--ok);">
+            <span class="dot green"></span>
+            <span>Telemetry Server: Live</span>
+          </li>
+          <li style="color:var(--text-dim);">1,247 Fleet Nodes Synced</li>
+          <li style="color:var(--text-dim);">Latency: 0.4ms avg response</li>
+          <li style="color:var(--text-dim);">CLI Interface: v1.0.0 Active</li>
+          <li style="margin-top:8px;">
+            <button class="btn btn-ghost" onclick="openAuthModal()" style="padding:5px 12px;font-size:11px;width:100%;justify-content:center;" aria-label="Access Demo Workspace">
+              <i class="ph-bold ph-shield-check" aria-hidden="true"></i>
+              <span>Access Demo Workspace</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>&copy; 2026 DiagIoT Autonomous Fleet Systems &middot; Released under the MIT License &middot; RFC 8259 Standardized</div>
+      <div class="footer-legal-links">
+        <a href="#security" class="footer-link" onclick="openDoc('security');return false;">Air-Gapped Security</a>
+        <a href="#security" class="footer-link" onclick="openDoc('security');return false;">Local Data Isolation</a>
+        <span>Press <kbd style="background:var(--surface2);padding:2px 6px;border-radius:4px;border:1px solid var(--border);">Shift + /</kbd> for CLI Quick Help</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+
+<div class="doc-modal-backdrop" id="docModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="docModalTitle">
+  <div class="doc-modal">
+    <div class="doc-modal-header">
+      <div class="doc-modal-title" id="docModalTitle">
+        <i class="ph-bold ph-book-open" aria-hidden="true"></i>
+        <span id="docModalTitleText">Technical Specification</span>
+      </div>
+      <button class="auth-modal-close" onclick="closeDocModal()" aria-label="Close Specification Dialog">
+        <i class="ph-bold ph-x" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="doc-modal-body" id="docModalBody">
+    </div>
+
+    <div class="doc-modal-footer">
+      <button class="btn btn-ghost" onclick="closeDocModal()" aria-label="Close Dialog">
+        <span>Close</span>
+      </button>
+      <button class="btn btn-primary" id="docLaunchBtn" onclick="launchFromDoc()" aria-label="Launch Workspace (Requires Authentication)">
+        <i class="ph-bold ph-lock-key" aria-hidden="true"></i>
+        <span>Launch in Workspace (Auth Required)</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="auth-modal-backdrop" id="authModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+  <div class="auth-modal">
+    <div class="auth-modal-header">
+      <div class="auth-modal-title" id="authModalTitle">
+        <i class="ph-bold ph-lock-key" aria-hidden="true"></i>
+        <span>Authenticate &middot; Launch Dashboard</span>
+      </div>
+      <button class="auth-modal-close" onclick="closeAuthModal()" aria-label="Close Authentication Dialog">
+        <i class="ph-bold ph-x" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="auth-modal-body">
+      <div class="control-group-title">Select Engineering Role Preset</div>
+      <div class="role-selector-grid" role="radiogroup" aria-label="Select Demo Role">
+        <button class="role-chip active" data-role="firmware" onclick="selectAuthRole('firmware')" role="radio" aria-checked="true">
+          <span>Firmware Lead</span>
+        </button>
+        <button class="role-chip" data-role="fleet" onclick="selectAuthRole('fleet')" role="radio" aria-checked="false">
+          <span>Fleet Ops Lead</span>
+        </button>
+        <button class="role-chip" data-role="qa" onclick="selectAuthRole('qa')" role="radio" aria-checked="false">
+          <span>QA Release Lead</span>
+        </button>
+      </div>
+
+      <div class="auth-input-group">
+        <label for="authEmail" class="auth-label">Engineer Identity / Work Email</label>
+        <input type="email" id="authEmail" class="auth-input" value="engineer.lead@diagiot.internal" autocomplete="email" required>
+      </div>
+
+      <div class="auth-input-group">
+        <label for="authKey" class="auth-label">Access Key / Session Token</label>
+        <input type="password" id="authKey" class="auth-input" value="diag-prod-node-key-889" autocomplete="current-password" required>
+      </div>
+
+      <div class="auth-status-box" id="authStatusBox" aria-live="polite">
+        <i class="ph-bold ph-shield-check" aria-hidden="true"></i>
+        <span id="authStatusText">Ready for session handshake.</span>
+      </div>
+    </div>
+
+    <div class="auth-modal-footer">
+      <button class="btn btn-ghost" onclick="closeAuthModal()" aria-label="Cancel Authentication">
+        <span>Cancel</span>
+      </button>
+      <button class="btn btn-primary" id="authSubmitBtn" onclick="submitAuthLaunch()" aria-label="Verify and Launch Workspace">
+        <i class="ph-bold ph-sign-in" aria-hidden="true"></i>
+        <span>Launch Dashboard</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="privacy-banner" id="privacyBanner" role="region" aria-label="Telemetry Transparency Notice">
+  <div>
+    <strong style="color:var(--text-bright);">Telemetry Transparency:</strong> DiagIoT adheres strictly to local telemetry isolation and standard RFC data schemas with zero unauthorized telemetry sharing.
+  </div>
+  <button class="btn btn-ghost" onclick="dismissPrivacyBanner()" style="padding:4px 10px;font-size:11px;" aria-label="Acknowledge Privacy Notice">
+    <span>Acknowledge</span>
+  </button>
+</div>
+
+<div class="app-interface" id="appInterface" aria-hidden="true">
+  <header class="topbar" role="banner">
+    <div class="topbar-brand">
+      <i class="ph-bold ph-cpu" aria-hidden="true"></i>
+      <span class="brand-name">DiagIoT</span>
+      <span class="brand-sub">Agentic Drift Engine</span>
+    </div>
+    <nav class="topbar-agents" aria-label="Active agents">
+      <span class="agent-pill preship"><span class="pulse-dot teal"></span>Pre-Ship</span>
+      <span class="agent-pill monitor"><span class="pulse-dot blue"></span>Monitor</span>
+      <span class="agent-pill onboard"><span class="pulse-dot amber"></span>Onboarding</span>
+    </nav>
+    <div class="topbar-right">
+      <button class="topbar-btn" onclick="exitToLanding()" title="Return to Landing Page" aria-label="Return to Landing Page">
+        <i class="ph-bold ph-house"></i>
+        <span>Portal Home</span>
+      </button>
+      <span class="env-pill">Production</span>
+      <button class="topbar-btn cli-launch-btn" id="cliPanelBtn" title="Open CLI panel" aria-label="Open CLI panel">
+        <i class="ph-bold ph-terminal-window"></i>
+        <span>CLI</span>
+      </button>
+      <div class="avatar" aria-label="User: JD">JD</div>
+    </div>
+  </header>
+
+  <nav class="sidebar" aria-label="Main navigation">
+    <div class="nav-group">
+      <div class="group-label preship-label">
+        <i class="ph-bold ph-shield-check"></i> Pre-Ship Agent
+      </div>
+      <a class="nav-link" data-screen="preship" href="#preship" onclick="switchScreen('preship');return false;">
+        <i class="ph-bold ph-scan"></i><span>Pre-Ship Scan</span>
+      </a>
+    </div>
+    <div class="nav-group">
+      <div class="group-label monitor-label">
+        <i class="ph-bold ph-eye"></i> Monitor &amp; Investigate
+      </div>
+      <a class="nav-link active" data-screen="dashboard" href="#dashboard" onclick="switchScreen('dashboard');return false;">
+        <i class="ph-bold ph-squares-four"></i><span>Dashboard</span>
+      </a>
+      <a class="nav-link" data-screen="field" href="#field" onclick="switchScreen('field');return false;">
+        <i class="ph-bold ph-broadcast"></i><span>Field Monitor</span>
+      </a>
+      <a class="nav-link" data-screen="drift" href="#drift" onclick="switchScreen('drift');return false;">
+        <i class="ph-bold ph-chart-line-up"></i><span>Drift Analysis</span>
+      </a>
+      <a class="nav-link" data-screen="timeline" href="#timeline" onclick="switchScreen('timeline');return false;">
+        <i class="ph-bold ph-clock-countdown"></i><span>Event Timeline</span>
+      </a>
+      <a class="nav-link" data-screen="diff" href="#diff" onclick="switchScreen('diff');return false;">
+        <i class="ph-bold ph-git-diff"></i><span>Firmware Diff</span>
+      </a>
+      <a class="nav-link" data-screen="repro" href="#repro" onclick="switchScreen('repro');return false;">
+        <i class="ph-bold ph-arrows-clockwise"></i><span>Reproduce</span>
+      </a>
+    </div>
+    <div class="nav-group">
+      <div class="group-label neutral-label">
+        <i class="ph-bold ph-link"></i> Shared
+      </div>
+      <a class="nav-link" data-screen="integrations" href="#integrations" onclick="switchScreen('integrations');return false;">
+        <i class="ph-bold ph-plugs-connected"></i><span>Integrations</span>
+      </a>
+    </div>
+    <div class="nav-group">
+      <div class="group-label onboard-label">
+        <i class="ph-bold ph-compass"></i> Onboarding Agent
+      </div>
+      <a class="nav-link" data-screen="onboard" href="#onboard" onclick="switchScreen('onboard');return false;">
+        <i class="ph-bold ph-graduation-cap"></i><span>Engineer Onboarding</span>
+      </a>
+      <a class="nav-link" data-screen="knowledge" href="#knowledge" onclick="switchScreen('knowledge');return false;">
+        <i class="ph-bold ph-books"></i><span>Knowledge Base</span>
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="agent-status-row"><span class="dot teal"></span>Pre-Ship — Active</div>
+      <div class="agent-status-row"><span class="dot blue"></span>Monitor — Active</div>
+      <div class="agent-status-row"><span class="dot amber"></span>Onboarding — Active</div>
+      <div class="conn-row"><span class="dot green"></span>Agentic Engine — Live</div>
+    </div>
+  </nav>
+
+  <main class="main" id="mainContent">
+    <div class="screen-tabs" role="tablist" aria-label="Screen navigation">
+      <button role="tab" class="tab active" data-screen="dashboard" onclick="switchScreen('dashboard')">Dashboard</button>
+      <button role="tab" class="tab" data-screen="preship" onclick="switchScreen('preship')">Pre-Ship Scan</button>
+      <button role="tab" class="tab" data-screen="field" onclick="switchScreen('field')">Field Monitor</button>
+      <button role="tab" class="tab" data-screen="drift" onclick="switchScreen('drift')">Drift Analysis</button>
+      <button role="tab" class="tab" data-screen="timeline" onclick="switchScreen('timeline')">Event Timeline</button>
+      <button role="tab" class="tab" data-screen="diff" onclick="switchScreen('diff')">Firmware Diff</button>
+      <button role="tab" class="tab" data-screen="integrations" onclick="switchScreen('integrations')">Integrations</button>
+      <button role="tab" class="tab" data-screen="onboard" onclick="switchScreen('onboard')">Onboarding</button>
+    </div>
+
+    <div id="screensContainer"></div>
+  </main>
+
+  <div class="cli-overlay" id="cliOverlay" aria-hidden="true"></div>
+  <aside class="cli-panel" id="cliPanel" role="complementary" aria-label="CLI Panel" aria-hidden="true">
+    <div class="cli-panel-header">
+      <div class="cli-panel-title">
+        <i class="ph-bold ph-terminal-window"></i>
+        DiagIoT CLI
+        <span class="cli-version">v1.0.0</span>
+      </div>
+      <button class="cli-close-btn" id="cliCloseBtn" aria-label="Close CLI panel">
+        <i class="ph-bold ph-x"></i>
+      </button>
+    </div>
+    <div class="cli-output" id="cliOutput" aria-live="polite" aria-label="CLI output"></div>
+    <div class="cli-input-row">
+      <span class="cli-prompt">diagiot &gt;</span>
+      <input type="text" class="cli-input" id="cliInput" autocomplete="off" spellcheck="false"
+        placeholder="Type a command or 'help'…" aria-label="CLI input">
+      <button class="cli-run-btn" id="cliRunBtn" aria-label="Run command">
+        <i class="ph-bold ph-paper-plane-right"></i>
+      </button>
+    </div>
+    <div class="cli-quickcmds">
+      <button onclick="cliRunQuick('help')">help</button>
+      <button onclick="cliRunQuick('fleet status')">fleet status</button>
+      <button onclick="cliRunQuick('scan run --target fw-v3.8.2-rc4')">scan run</button>
+      <button onclick="cliRunQuick('drift score --device AB-M7-5501')">drift score</button>
+      <button onclick="cliRunQuick('alerts list')">alerts list</button>
+      <button onclick="cliRunQuick('integrations list')">integrations</button>
+    </div>
+  </aside>
+
+  <div class="frame-label">DiagIoT &middot; Web + CLI &middot; 10 Screens &middot; 3 Agents</div>
+</div>
+
+<script src="app-data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
