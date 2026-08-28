@@ -480,7 +480,7 @@ window.fmFilter = function fmFilter(filter) {
   const healthOrder = { critical: 0, warning: 1, healthy: 2 };
   const sorted = filtered.slice().sort((a, b) => (healthOrder[a.health] ?? 3) - (healthOrder[b.health] ?? 3));
 
-  function deviceCard(d) {
+  const deviceCard = (d) => {
     const score = d.driftScore ?? 0;
     const alert = alts.find(a => a.deviceId === d.id && !a.acknowledged);
     const pct   = Math.round(score * 100);
@@ -514,7 +514,7 @@ window.fmFilter = function fmFilter(filter) {
         <div style="color:var(--text-dim)">${alert.type || ''}: ${(alert.message || '').slice(0, 80)}</div>
       </div>` : ''}
     </div>`;
-  }
+  };
 
   grid.innerHTML = sorted.map(deviceCard).join('') || '<div style="color:var(--text-dim);text-align:center;padding:32px">No devices match this filter</div>';
 };
