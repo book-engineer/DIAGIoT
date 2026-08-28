@@ -1,13 +1,3 @@
-/**
- * DiagIoT Backend — Data Store
- *
- * In-process state store that is populated by real integration adapters.
- * No hardcoded values — all data written here comes from live integrations:
- * GitHub webhooks, Arduino CLI serial reads, Jenkins API polls, Docker events, etc.
- *
- * Consumers (routes, CLI, WebSocket broadcast) read from this store.
- */
-
 'use strict';
 
 const { EventEmitter } = require('events');
@@ -16,19 +6,19 @@ class Store extends EventEmitter {
   constructor() {
     super();
 
-    /** @type {Map<string, Device>} */
+    
     this.devices = new Map();
 
-    /** @type {Map<string, Alert>} */
+    
     this.alerts = new Map();
 
-    /** @type {Map<string, ScanResult>} */
+    
     this.scans = new Map();
 
-    /** @type {Map<string, Baseline>} */
+    
     this.baselines = new Map();
 
-    /** @type {Map<string, Integration>} */
+    
     this.integrations = new Map([
       ['arduino',  { id: 'arduino',  name: 'Arduino IDE / Arduino CLI', status: 'disconnected', detail: null, connectedAt: null }],
       ['github',   { id: 'github',   name: 'GitHub',                    status: 'disconnected', detail: null, connectedAt: null }],
@@ -40,24 +30,24 @@ class Store extends EventEmitter {
       ['segger',   { id: 'segger',   name: 'SEGGER Ozone / J-Link',     status: 'disconnected', detail: null, connectedAt: null }],
     ]);
 
-    /** @type {Map<string, AgentStatus>} */
+    
     this.agents = new Map([
       ['preship',  { id: 'preship',  name: 'Pre-Ship Agent',             status: 'idle',    lastActivity: null, metrics: {} }],
       ['monitor',  { id: 'monitor',  name: 'Monitor & Investigate Agent', status: 'idle',    lastActivity: null, metrics: {} }],
       ['onboard',  { id: 'onboard',  name: 'Onboarding Agent',           status: 'idle',    lastActivity: null, metrics: {} }],
     ]);
 
-    /** @type {TelemetrySample[]} — ring buffer, last 300 samples per device */
+    
     this.telemetry = new Map();
 
-    /** @type {KnowledgeArticle[]} — populated by Onboarding Agent curation */
+    
     this.knowledge = [];
 
-    /** @type {Incident[]} */
+    
     this.incidents = [];
   }
 
-  // ── Devices ──────────────────────────────────────────────
+  
   upsertDevice(device) {
     const existing = this.devices.get(device.id) || {};
     const merged = { ...existing, ...device, updatedAt: new Date().toISOString() };
@@ -69,13 +59,13 @@ class Store extends EventEmitter {
   getDevice(id) { return this.devices.get(id) || null; }
   getAllDevices() { return Array.from(this.devices.values()); }
 
-  // ── Alerts ───────────────────────────────────────────────
+  
   addAlert(alert) {
     const id = alert.id || `alert-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const full = { ...alert, id, createdAt: new Date().toISOString(), acknowledged: false };
     this.alerts.set(id, full);
     this.emit('alert:created', full);
-    // Update agent metrics
+    
     const mon = this.agents.get('monitor');
     if (mon) {
       mon.metrics.alertCount = (mon.metrics.alertCount || 0) + 1;
@@ -101,7 +91,7 @@ class Store extends EventEmitter {
     return list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }
 
-  // ── Scans ────────────────────────────────────────────────
+  
   addScan(scan) {
     const id = scan.id || `scan-${Date.now()}`;
     const full = { ...scan, id, createdAt: new Date().toISOString() };
@@ -124,7 +114,7 @@ class Store extends EventEmitter {
 
   getAllScans() { return Array.from(this.scans.values()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); }
 
-  // ── Baselines ────────────────────────────────────────────
+  
   setBaseline(deviceId, baseline) {
     const full = { ...baseline, deviceId, capturedAt: new Date().toISOString() };
     this.baselines.set(deviceId, full);
@@ -134,12 +124,12 @@ class Store extends EventEmitter {
 
   getBaseline(deviceId) { return this.baselines.get(deviceId) || null; }
 
-  // ── Telemetry ────────────────────────────────────────────
+  
   pushTelemetry(deviceId, sample) {
     if (!this.telemetry.has(deviceId)) this.telemetry.set(deviceId, []);
     const buf = this.telemetry.get(deviceId);
     buf.push({ ...sample, ts: new Date().toISOString() });
-    if (buf.length > 300) buf.shift();       // ring buffer
+    if (buf.length > 300) buf.shift();       
     this.emit('telemetry', { deviceId, sample });
   }
 
@@ -148,7 +138,7 @@ class Store extends EventEmitter {
     return buf.slice(-limit);
   }
 
-  // ── Integrations ─────────────────────────────────────────
+  
   setIntegrationStatus(id, status, detail) {
     const intg = this.integrations.get(id);
     if (!intg) return;
@@ -162,7 +152,7 @@ class Store extends EventEmitter {
   getAllIntegrations() { return Array.from(this.integrations.values()); }
   getIntegration(id) { return this.integrations.get(id) || null; }
 
-  // ── Agents ───────────────────────────────────────────────
+  
   setAgentStatus(id, status, metrics) {
     const agent = this.agents.get(id);
     if (!agent) return;
@@ -175,7 +165,7 @@ class Store extends EventEmitter {
 
   getAllAgents() { return Array.from(this.agents.values()); }
 
-  // ── Knowledge Base ───────────────────────────────────────
+  
   addKnowledgeArticle(article) {
     const id = article.id || `kb-${Date.now()}`;
     const full = { ...article, id, createdAt: article.createdAt || new Date().toISOString() };
@@ -196,7 +186,7 @@ class Store extends EventEmitter {
     );
   }
 
-  // ── Fleet summary ─────────────────────────────────────────
+  
   getFleetSummary() {
     const devices = this.getAllDevices();
     const total = devices.length;
@@ -209,7 +199,7 @@ class Store extends EventEmitter {
     return { total, healthy, drifting, critical, uptime: `${uptime}%`, alertCount, agentsOnline };
   }
 
-  // ── Incidents ─────────────────────────────────────────────
+  
   addIncident(incident) {
     const id = incident.id || `inc-${Date.now()}`;
     const full = { ...incident, id, createdAt: new Date().toISOString() };
@@ -221,6 +211,5 @@ class Store extends EventEmitter {
   getIncidents() { return [...this.incidents].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); }
 }
 
-// Singleton store shared across all modules
 const store = new Store();
 module.exports = store;

@@ -363,60 +363,86 @@
       </div>
     </section>
 
-    <section class="section-container" id="testimonials" aria-label="Field Verification and Testimonials">
+    <section class="section-container" id="pipeline" aria-label="End-to-End Diagnostic Pipeline">
       <div class="section-header">
-        <span class="section-badge monitor">Human Experience</span>
-        <h2 class="section-title">Designed for Engineers, Proven in the Field</h2>
+        <span class="section-badge monitor">Autonomous Intelligence Flow</span>
+        <h2 class="section-title">End-to-End Diagnostic Pipeline</h2>
         <p class="section-subtitle">
-          Real feedback from teams running mission-critical IoT devices in automotive, industrial, and smart infrastructure deployments.
+          From bare-metal ring buffer capture to automated CI/CD gatekeeping &mdash; deterministic telemetry correlation with zero cloud overhead.
         </p>
       </div>
 
-      <div class="testimonials-grid">
-        <div class="testimonial-card">
-          <p class="quote-body">
-            "Before DiagIoT, finding an intermittent clock drift across 5,000 smart grid meters meant weeks of log archaeology. The Field Monitor agent pointed us directly to a timer register configuration bug in under 2 minutes."
-          </p>
-          <div class="author-info">
-            <div class="author-avatar">MT</div>
-            <div>
-              <div class="author-name">Marcus Vance</div>
-              <div class="author-role">Principal Firmware Architect &middot; GridPower IoT</div>
-            </div>
+      <div class="pipeline-grid">
+        <div class="pipeline-card">
+          <div class="pipeline-card-header">
+            <span class="pipeline-step-num">01</span>
+            <div class="pipeline-icon-wrap"><i class="ph-bold ph-cpu" aria-hidden="true"></i></div>
           </div>
+          <div class="pipeline-card-title">Low-Overhead Hardware Tap</div>
+          <div class="pipeline-card-subtitle">SWD &middot; SEGGER RTT &middot; SocketCAN</div>
+          <p class="pipeline-card-desc">
+            Captures task switch latency, stack high-water marks, and bus frames with sub-12KB memory overhead and zero contention.
+          </p>
+          <div class="pipeline-tech-tag">Bare-Metal &middot; FreeRTOS &middot; Zephyr</div>
         </div>
 
-        <div class="testimonial-card">
-          <p class="quote-body">
-            "The Pre-Ship Scan agent caught a subtle RTOS buffer overrun in our automotive gateway release candidate before it hit the factory floor. It literally saved us from a costly field recall."
-          </p>
-          <div class="author-info">
-            <div class="author-avatar">EL</div>
-            <div>
-              <div class="author-name">Elena Lindqvist</div>
-              <div class="author-role">Head of Embedded QA &middot; DriveSync Systems</div>
-            </div>
+        <div class="pipeline-card">
+          <div class="pipeline-card-header">
+            <span class="pipeline-step-num">02</span>
+            <div class="pipeline-icon-wrap"><i class="ph-bold ph-chart-line-up" aria-hidden="true"></i></div>
           </div>
+          <div class="pipeline-card-title">Kalman Drift Engine</div>
+          <div class="pipeline-card-subtitle">Statistical Anomaly Scoring</div>
+          <p class="pipeline-card-desc">
+            Compares rolling telemetry windows against immutable golden baselines, computing real-time sigma scores across all fleet nodes.
+          </p>
+          <div class="pipeline-tech-tag">Kalman Filter &middot; 3-Sigma Threshold</div>
         </div>
 
-        <div class="testimonial-card">
-          <p class="quote-body">
-            "Bringing junior firmware developers up to speed on our proprietary register maps used to take three weeks. The Onboarding Agent and Knowledge Base turned it into a frictionless half-day onboarding."
-          </p>
-          <div class="author-info">
-            <div class="author-avatar">DK</div>
-            <div>
-              <div class="author-name">David Kumar</div>
-              <div class="author-role">VP of Engineering &middot; AeroSens Automation</div>
-            </div>
+        <div class="pipeline-card">
+          <div class="pipeline-card-header">
+            <span class="pipeline-step-num">03</span>
+            <div class="pipeline-icon-wrap"><i class="ph-bold ph-git-diff" aria-hidden="true"></i></div>
           </div>
+          <div class="pipeline-card-title">ELF &amp; AST Diffing</div>
+          <div class="pipeline-card-subtitle">Commit &amp; Symbol Isolation</div>
+          <p class="pipeline-card-desc">
+            Disassembles target binaries and maps anomalous registers directly to source code commits and peripheral configuration changes.
+          </p>
+          <div class="pipeline-tech-tag">DWARF &middot; AST Graph &middot; Git Map</div>
+        </div>
+
+        <div class="pipeline-card">
+          <div class="pipeline-card-header">
+            <span class="pipeline-step-num">04</span>
+            <div class="pipeline-icon-wrap"><i class="ph-bold ph-books" aria-hidden="true"></i></div>
+          </div>
+          <div class="pipeline-card-title">Knowledge Graph Matching</div>
+          <div class="pipeline-card-subtitle">Autonomous Post-Mortem Index</div>
+          <p class="pipeline-card-desc">
+            Cross-references drift signatures against past fleet incidents and silicon errata to score root-cause hypotheses automatically.
+          </p>
+          <div class="pipeline-tech-tag">Vector Index &middot; Errata Database</div>
+        </div>
+
+        <div class="pipeline-card">
+          <div class="pipeline-card-header">
+            <span class="pipeline-step-num">05</span>
+            <div class="pipeline-icon-wrap"><i class="ph-bold ph-shield-check" aria-hidden="true"></i></div>
+          </div>
+          <div class="pipeline-card-title">Gate Action &amp; Repro Harness</div>
+          <div class="pipeline-card-subtitle">Zero-Touch CI/CD Gatekeeper</div>
+          <p class="pipeline-card-desc">
+            Blocks regressions before factory flashing, generates reproducible test scripts, and provides golden state remediation patches.
+          </p>
+          <div class="pipeline-tech-tag">GitHub Actions &middot; Jenkins Gate</div>
         </div>
       </div>
 
       <div class="cta-banner">
         <h3 class="cta-banner-title">Experience Autonomous Fleet Intelligence</h3>
         <p class="cta-banner-desc">
-          Launch the full DiagIoT workspace with all 10 specialized screens, real-time WebSocket feeds, and embedded CLI controls ready for exploration.
+          Launch the live DiagIoT workspace with all 10 specialized screens, real-time WebSocket feeds, and embedded CLI controls ready for exploration.
         </p>
         <button class="btn-hero-primary" onclick="openAuthModal()" aria-label="Open Workspace Now">
           <i class="ph-bold ph-arrow-right" aria-hidden="true"></i>
@@ -449,34 +475,34 @@
       <div>
         <div class="footer-col-title">Diagnostic Workspaces</div>
         <ul class="footer-links">
-          <li><a href="#preship" class="footer-link" onclick="launchScreen('preship');return false;">Pre-Ship Scan &amp; Gate</a></li>
-          <li><a href="#field" class="footer-link" onclick="launchScreen('field');return false;">Fleet Field Monitor</a></li>
-          <li><a href="#drift" class="footer-link" onclick="launchScreen('drift');return false;">Statistical Drift Analysis</a></li>
-          <li><a href="#diff" class="footer-link" onclick="launchScreen('diff');return false;">Firmware Diff &amp; AST</a></li>
-          <li><a href="#timeline" class="footer-link" onclick="launchScreen('timeline');return false;">Event Timeline &amp; Root Cause</a></li>
-          <li><a href="#repro" class="footer-link" onclick="launchScreen('repro');return false;">Harness Reproduction</a></li>
+          <li><a href="#preship" class="footer-link" onclick="requestWorkspaceAuth('preship', 'qa');return false;">Pre-Ship Scan &amp; Gate</a></li>
+          <li><a href="#field" class="footer-link" onclick="requestWorkspaceAuth('field', 'fleet');return false;">Fleet Field Monitor</a></li>
+          <li><a href="#drift" class="footer-link" onclick="requestWorkspaceAuth('drift', 'firmware');return false;">Statistical Drift Analysis</a></li>
+          <li><a href="#diff" class="footer-link" onclick="requestWorkspaceAuth('diff', 'firmware');return false;">Firmware Diff &amp; AST</a></li>
+          <li><a href="#timeline" class="footer-link" onclick="requestWorkspaceAuth('timeline', 'fleet');return false;">Event Timeline &amp; Root Cause</a></li>
+          <li><a href="#repro" class="footer-link" onclick="requestWorkspaceAuth('repro', 'qa');return false;">Harness Reproduction</a></li>
         </ul>
       </div>
 
       <div>
         <div class="footer-col-title">Toolchain &amp; Protocols</div>
         <ul class="footer-links">
-          <li><a href="#integrations" class="footer-link" onclick="launchScreen('integrations');return false;">J-Link &amp; Serial Adapters</a></li>
-          <li><a href="#integrations" class="footer-link" onclick="launchScreen('integrations');return false;">GitHub &amp; Jenkins CI Gate</a></li>
-          <li><a href="#architecture" class="footer-link">CAN 2.0B &amp; SocketCAN Bus</a></li>
-          <li><a href="#architecture" class="footer-link">Bare-Metal RTOS Tracing</a></li>
-          <li><a href="#integrations" class="footer-link" onclick="launchScreen('integrations');return false;">Docker Virtual Fleets</a></li>
+          <li><a href="#hil" class="footer-link" onclick="openDoc('hil');return false;">Hardware-in-the-Loop Gate</a></li>
+          <li><a href="#bus" class="footer-link" onclick="openDoc('bus');return false;">CAN 2.0B &amp; Multi-Bus</a></li>
+          <li><a href="#rtos" class="footer-link" onclick="openDoc('rtos');return false;">Bare-Metal &amp; RTOS Taps</a></li>
+          <li><a href="#docker" class="footer-link" onclick="openDoc('docker');return false;">Virtual Fleet Engine</a></li>
+          <li><a href="#integrations" class="footer-link" onclick="requestWorkspaceAuth('integrations', 'fleet');return false;">Integration Hub</a></li>
         </ul>
       </div>
 
       <div>
         <div class="footer-col-title">Engineering Knowledge</div>
         <ul class="footer-links">
-          <li><a href="#onboard" class="footer-link" onclick="launchScreen('onboard');return false;">Engineer Onboarding Hub</a></li>
-          <li><a href="#knowledge" class="footer-link" onclick="launchScreen('knowledge');return false;">Incident Knowledge Base</a></li>
-          <li><a href="#sandbox" class="footer-link">Interactive Drift Sandbox</a></li>
-          <li><a href="#architecture" class="footer-link">Air-Gapped Telemetry Specs</a></li>
-          <li><a href="#cli" class="footer-link" onclick="initCLI();if(typeof openCLI==='function')openCLI();return false;">DiagIoT CLI Reference</a></li>
+          <li><a href="#onboarding" class="footer-link" onclick="openDoc('onboarding');return false;">Engineer Onboarding Track</a></li>
+          <li><a href="#knowledge" class="footer-link" onclick="openDoc('knowledge');return false;">Incident Knowledge Base</a></li>
+          <li><a href="#cli" class="footer-link" onclick="openDoc('cli');return false;">DiagIoT CLI Reference</a></li>
+          <li><a href="#api" class="footer-link" onclick="openDoc('api');return false;">REST &amp; WebSocket APIs</a></li>
+          <li><a href="#security" class="footer-link" onclick="openDoc('security');return false;">Air-Gapped Telemetry Specs</a></li>
         </ul>
       </div>
 
@@ -503,12 +529,40 @@
     <div class="footer-bottom">
       <div>&copy; 2026 DiagIoT Autonomous Fleet Systems &middot; Released under the MIT License &middot; RFC 8259 Standardized</div>
       <div class="footer-legal-links">
-        <a href="#architecture" class="footer-link">Air-Gapped Security</a>
-        <a href="#architecture" class="footer-link">Local Data Isolation</a>
+        <a href="#security" class="footer-link" onclick="openDoc('security');return false;">Air-Gapped Security</a>
+        <a href="#security" class="footer-link" onclick="openDoc('security');return false;">Local Data Isolation</a>
         <span>Press <kbd style="background:var(--surface2);padding:2px 6px;border-radius:4px;border:1px solid var(--border);">Shift + /</kbd> for CLI Quick Help</span>
       </div>
     </div>
   </footer>
+</div>
+
+
+<div class="doc-modal-backdrop" id="docModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="docModalTitle">
+  <div class="doc-modal">
+    <div class="doc-modal-header">
+      <div class="doc-modal-title" id="docModalTitle">
+        <i class="ph-bold ph-book-open" aria-hidden="true"></i>
+        <span id="docModalTitleText">Technical Specification</span>
+      </div>
+      <button class="auth-modal-close" onclick="closeDocModal()" aria-label="Close Specification Dialog">
+        <i class="ph-bold ph-x" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="doc-modal-body" id="docModalBody">
+    </div>
+
+    <div class="doc-modal-footer">
+      <button class="btn btn-ghost" onclick="closeDocModal()" aria-label="Close Dialog">
+        <span>Close</span>
+      </button>
+      <button class="btn btn-primary" id="docLaunchBtn" onclick="launchFromDoc()" aria-label="Launch Workspace (Requires Authentication)">
+        <i class="ph-bold ph-lock-key" aria-hidden="true"></i>
+        <span>Launch in Workspace (Auth Required)</span>
+      </button>
+    </div>
+  </div>
 </div>
 
 <div class="auth-modal-backdrop" id="authModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
