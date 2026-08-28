@@ -1,6 +1,9 @@
 node_modules/
 dist/
 build/
+.venv
+_pycache_/
+*.pyc
 .env
 *.log
 .DS_Store
