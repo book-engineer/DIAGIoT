@@ -83,6 +83,7 @@ wss.on('connection', (ws, req) => {
   
   if (verifySupabaseJWT) {
     const urlObj = new URL(req.url || '/', 'http://' + (req.headers.host || 'localhost'));
+    const token  = urlObj.searchParams.get('token');
     if (!token) {
       ws.close(4001, 'Unauthorized');
       return;
