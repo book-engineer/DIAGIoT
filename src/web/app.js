@@ -349,7 +349,7 @@ SCREENS.field = () => {
   const devs = window.D?.devices || [];
   const alts = window.D?.alerts  || [];
 
-  function deviceCard(d) {
+  const deviceCard = (d) => {
     const score = d.driftScore ?? 0;
     const alert = alts.find(a => a.deviceId === d.id && !a.acknowledged);
     const pct   = Math.round(score * 100);
@@ -383,7 +383,7 @@ SCREENS.field = () => {
         <div style="color:var(--text-dim)">${alert.type || ''}: ${(alert.message || '').slice(0, 80)}</div>
       </div>` : ''}
     </div>`;
-  }
+  };
 
   const healthOrder = { critical: 0, warning: 1, healthy: 2 };
   const sorted = devs.slice().sort((a, b) => (healthOrder[a.health] ?? 3) - (healthOrder[b.health] ?? 3));
@@ -533,12 +533,12 @@ SCREENS.drift = () => {
     [0.22, 0.07, 0.55, 0.28, 1.00, 0.32],
     [0.09, 0.41, 0.18, 0.11, 0.32, 1.00],
   ];
-  function cellColor(v) {
+  const cellColor = (v) => {
     if (v >= 0.70) return 'var(--danger)';
     if (v >= 0.40) return 'var(--warn)';
     if (v >= 0.20) return 'var(--monitor)';
     return 'var(--surface2)';
-  }
+  };
   const matrixHTML = signals.map((row, i) =>
     `<tr><td style="font-size:10px;font-weight:600;color:var(--text-dim);white-space:nowrap">${row}</td>` +
     signals.map((col, j) => {
