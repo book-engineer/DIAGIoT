@@ -1,0 +1,575 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DiagIoT — Problem &amp; Solution Statements</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #1f2328;
+    background: #ffffff;
+    padding: 40px 20px 60px;
+  }
+  .page { max-width: 760px; margin: 0 auto; }
+
+  /* ── Header ── */
+  .doc-header {
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 24px;
+    margin-bottom: 36px;
+  }
+  .doc-header .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #57606a;
+    margin-bottom: 8px;
+  }
+  .doc-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1f2328;
+    line-height: 1.2;
+  }
+  .doc-header .subtitle {
+    font-size: 14px;
+    color: #57606a;
+    margin-top: 8px;
+  }
+  .meta-row {
+    display: flex;
+    gap: 28px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .meta-item { font-size: 12px; color: #57606a; }
+  .meta-item strong { color: #1f2328; }
+
+  /* ── Section ── */
+  .section {
+    margin-bottom: 44px;
+  }
+  .section-label {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: #ffffff;
+    background: #3b82d4;
+    padding: 3px 10px;
+    border-radius: 3px;
+    margin-bottom: 14px;
+  }
+  .section-label.solution { background: #1a7f4b; }
+  h2 {
+    font-size: 19px;
+    font-weight: 700;
+    color: #1f2328;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1f2328;
+    margin-top: 24px;
+    margin-bottom: 8px;
+  }
+  p { margin-bottom: 14px; color: #1f2328; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── Callout box ── */
+  .callout {
+    background: #f7f8fa;
+    border-left: 3px solid #3b82d4;
+    padding: 14px 18px;
+    margin: 20px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 13.5px;
+  }
+  .callout.solution { border-color: #1a7f4b; }
+  .callout strong { color: #1f2328; }
+
+  /* ── Challenge list ── */
+  .challenge-list {
+    list-style: none;
+    margin: 16px 0;
+    padding: 0;
+  }
+  .challenge-list li {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+  .challenge-num {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    background: #3b82d4;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .challenge-body { flex: 1; }
+  .challenge-title { font-weight: 700; font-size: 13.5px; color: #1f2328; margin-bottom: 4px; }
+  .challenge-desc { font-size: 13px; color: #444d56; line-height: 1.6; }
+
+  /* ── Impact grid ── */
+  .impact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .impact-card {
+    background: #fff3cd;
+    border: 1px solid #f0c040;
+    border-radius: 5px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #5a4000;
+  }
+  .impact-card::before {
+    content: "⚠ ";
+    font-size: 12px;
+  }
+
+  /* ── Agent table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 16px 0;
+  }
+  th {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    padding: 9px 13px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 12px;
+    color: #57606a;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  td {
+    border: 1px solid #e5e7eb;
+    padding: 9px 13px;
+    vertical-align: top;
+    color: #1f2328;
+  }
+  tr:nth-child(even) td { background: #fafafa; }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+  .badge-critical { background: #fee2e2; color: #991b1b; }
+  .badge-warning  { background: #fef3c7; color: #92400e; }
+  .badge-safe     { background: #d1fae5; color: #065f46; }
+  .badge-low      { background: #e0e7ff; color: #3730a3; }
+
+  /* ── Drift score formula ── */
+  .formula-block {
+    background: #1f2328;
+    color: #e4e6f0;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 12.5px;
+    padding: 16px 20px;
+    border-radius: 6px;
+    margin: 16px 0;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+  .formula-comment { color: #7c809a; }
+
+  /* ── Solution pillars ── */
+  .pillar-list {
+    list-style: none;
+    margin: 16px 0;
+    padding: 0;
+  }
+  .pillar-list li {
+    padding: 13px 16px;
+    border: 1px solid #d1fae5;
+    background: #f0fdf4;
+    border-radius: 5px;
+    margin-bottom: 9px;
+    font-size: 13px;
+    color: #1f2328;
+  }
+  .pillar-title { font-weight: 700; color: #065f46; display: block; margin-bottom: 3px; }
+
+  /* ── Loop diagram ── */
+  .loop-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .loop-node {
+    background: #3b82d4;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 5px;
+    text-align: center;
+    min-width: 120px;
+  }
+  .loop-node.green { background: #1a7f4b; }
+  .loop-node.purple { background: #7c5cd8; }
+  .loop-arrow {
+    font-size: 18px;
+    color: #57606a;
+    padding: 0 6px;
+    font-weight: 700;
+  }
+
+  /* ── Threshold table ── */
+  .threshold-row-safe     td:first-child { font-weight: 700; color: #065f46; }
+  .threshold-row-low      td:first-child { font-weight: 700; color: #3730a3; }
+  .threshold-row-warning  td:first-child { font-weight: 700; color: #92400e; }
+  .threshold-row-critical td:first-child { font-weight: 700; color: #991b1b; }
+
+  /* ── Divider ── */
+  hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 40px 0;
+  }
+
+  /* ── Footer ── */
+  .doc-footer {
+    margin-top: 60px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+    font-size: 12px;
+    color: #57606a;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  
+  <div class="doc-header">
+    <div class="label">Technical Documentation · DiagIoT Platform</div>
+    <h1>Problem &amp; Solution Statements</h1>
+    <div class="subtitle">Agentic Drift Detection for Embedded IoT Device Fleets</div>
+    <div class="meta-row">
+      <div class="meta-item"><strong>Document version:</strong> 1.0</div>
+      <div class="meta-item"><strong>Platform version:</strong> DiagIoT v1.0 MVP</div>
+      <div class="meta-item"><strong>Date:</strong> 2025</div>
+      <div class="meta-item"><strong>Status:</strong> Final</div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-label">Problem Statement</div>
+    <h2>Silent Degradation in Embedded IoT Fleets</h2>
+
+    <h3>Context</h3>
+    <p>
+      Embedded IoT devices deployed in industrial, infrastructure, automotive, and logistics
+      environments degrade silently over time. A sensor's analog readings drift away from
+      calibrated values. A firmware update subtly alters hardware timing. A power rail develops
+      ripple that couples noise into an ADC sampling channel. These degradation patterns are
+      slow-moving, cross-domain, and invisible to conventional threshold-based monitors — yet they
+      cause cascading failures in the field: incorrect actuator commands, missed safety triggers,
+      corrupted telemetry streams, and eventual device failure.
+    </p>
+
+    <div class="callout">
+      <strong>Core tension:</strong> The smaller and more constrained the embedded device, the
+      harder it is to instrument. Firmware updates that look identical at the functional test level
+      can carry material drift risk that only manifests under real field conditions — temperature
+      cycling, supply variation, long-duration timer accumulation — often weeks after deployment.
+    </div>
+
+    <h3>Three Compounding Challenges</h3>
+    <ul class="challenge-list">
+      <li>
+        <div class="challenge-num">1</div>
+        <div class="challenge-body">
+          <div class="challenge-title">No pre-ship firmware drift gate</div>
+          <div class="challenge-desc">
+            Firmware is compiled, tested at the functional level, and pushed directly to production
+            devices without any automated scoring of how much it deviates from a known-good
+            behavioral baseline. A release that introduces a register timing change, a DMA buffer
+            reconfiguration, or an ADC sensitivity shift may pass all integration tests yet carry
+            significant latent drift risk — risk that only materialises in the field, at scale,
+            and often across hundreds of devices simultaneously.
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="challenge-num">2</div>
+        <div class="challenge-body">
+          <div class="challenge-title">Reactive, manual field diagnosis</div>
+          <div class="challenge-desc">
+            When a device begins drifting in production, there is no automated system to detect the
+            anomaly early, correlate cross-signal patterns (e.g., power ripple causing ADC offset
+            causing clock cascade), or form a root-cause hypothesis. Engineers must manually pull
+            telemetry logs, mentally compare against remembered baselines, and trace through recent
+            firmware changelogs — a process that takes hours to days per incident and requires deep
+            institutional knowledge that is rarely documented or transferable.
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="challenge-num">3</div>
+        <div class="challenge-body">
+          <div class="challenge-title">Knowledge loss and slow engineer onboarding</div>
+          <div class="challenge-desc">
+            When experienced engineers resolve a drift incident, findings and resolution steps are
+            rarely captured in a structured, searchable form. New engineers have no guided path
+            into the platform, device families, or diagnostic workflows — resulting in repeated
+            investigative effort across incidents, long time-to-resolution for recurring failure
+            modes, and a months-long ramp for new team members before they can investigate
+            independently.
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <h3>Business and Operational Impact</h3>
+    <div class="impact-grid">
+      <div class="impact-card">Firmware carrying drift risk ships undetected and reaches production devices</div>
+      <div class="impact-card">Drift-related field incidents are detected late, after measurable degradation</div>
+      <div class="impact-card">Institutional diagnostic knowledge lives in individuals, not the organisation</div>
+      <div class="impact-card">New engineers require weeks of shadowing before independent incident response</div>
+    </div>
+
+    <h3>Representative Field Examples</h3>
+    <p>
+      The following are real-class failure patterns captured in the DiagIoT seed dataset,
+      representing the types of incidents the platform is designed to detect and prevent:
+    </p>
+    <table>
+      <thead>
+        <tr><th>Device</th><th>Failure Mode</th><th>Root Cause</th><th>Drift Score</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>SensorHub-X4 #3192</td>
+          <td>GPIO Register Mismatch</td>
+          <td>Register write race condition — PORTB_CRH config deviates from golden baseline</td>
+          <td><span class="badge badge-critical">0.87 CRITICAL</span></td>
+        </tr>
+        <tr>
+          <td>ThermoNode-R2 #0841</td>
+          <td>Clock Skew Detected</td>
+          <td>TIM2 prescaler set to 0x0052 instead of 0x0047 — +10% clock cascade across all timer-derived peripherals</td>
+          <td><span class="badge badge-warning">0.52 WARNING</span></td>
+        </tr>
+        <tr>
+          <td>ActuatorBridge-M7 #5501</td>
+          <td>ADC Offset Drift</td>
+          <td>ADC0 offset drifted +48mV from baseline — supply noise on AVDD rail from DMA circular buffer overrun</td>
+          <td><span class="badge badge-warning">0.44 WARNING</span></td>
+        </tr>
+        <tr>
+          <td>EdgeGateway-E1 #7700</td>
+          <td>Memory Leak Pattern</td>
+          <td>MQTT reconnect logic allocating socket handles without freeing stale TLS contexts — heap fragmentation rising 0.042/hr</td>
+          <td><span class="badge badge-critical">0.91 CRITICAL</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>Summary:</strong> The embedded IoT fleet management problem is not a monitoring
+      problem — monitoring thresholds exist. It is a <em>detection latency, cross-signal
+      correlation, and institutional knowledge</em> problem. The gap between when drift begins and
+      when an engineer has enough context to act is where failures become outages.
+    </div>
+  </div>
+
+  <hr />
+
+  
+  <div class="section">
+    <div class="section-label solution">Solution Statement</div>
+    <h2>DiagIoT — Three-Agent Agentic Drift Detection Platform</h2>
+
+    <h3>Approach</h3>
+    <p>
+      DiagIoT replaces manual, reactive diagnosis with three autonomous, continuously operating
+      agents — each owning a distinct phase of the embedded device lifecycle. The platform closes
+      the full diagnostic loop end-to-end:
+    </p>
+
+    <div class="loop-diagram">
+      <div class="loop-node">Scan before<br />ship</div>
+      <div class="loop-arrow">→</div>
+      <div class="loop-node green">Monitor<br />in field</div>
+      <div class="loop-arrow">→</div>
+      <div class="loop-node purple">Investigate<br />&amp; capture</div>
+      <div class="loop-arrow">→</div>
+      <div class="loop-node">Apply to<br />next scan</div>
+    </div>
+
+    <h3>The Three Agents</h3>
+    <table>
+      <thead>
+        <tr><th>Agent</th><th>Phase</th><th>Core Function</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Pre-Ship Agent</strong></td>
+          <td>Pre-deployment</td>
+          <td>Scans every firmware build, computes a weighted 5-component drift-risk score, and issues a Pass / Warn / Block gate decision before any release reaches a device. Integrates directly into Arduino, VS Code, Keil, Jenkins, GitHub Actions, and Docker pipelines.</td>
+        </tr>
+        <tr>
+          <td><strong>Monitor &amp; Investigate Agent</strong></td>
+          <td>In-field</td>
+          <td>Continuously evaluates incoming device telemetry against captured golden baselines, detects threshold crossings with debounced alerting, correlates cross-signal patterns across a 6-signal dimension space, and publishes typed, confidence-scored root-cause hypotheses.</td>
+        </tr>
+        <tr>
+          <td><strong>Onboarding Agent</strong></td>
+          <td>Human enablement</td>
+          <td>Guides new engineers through a staged learning path covering platform architecture, hardware setup, drift workflows, and CI/CD gating. Curates institutional knowledge from resolved incidents into a structured, searchable Knowledge Base accessible across all future investigations.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>The Drift Score — A Unified Decision Metric</h3>
+    <p>
+      Every decision in the platform is driven by a single normalised <strong>0.00–1.00 drift
+      score</strong>, computed with different input weights for firmware risk (pre-ship) versus
+      field telemetry health (monitoring). A consistent scale means the same thresholds, the same
+      verdict vocabulary, and the same alert severity model apply across both pipelines.
+    </p>
+
+    <div class="formula-block">
+<span class="formula-comment">// Pre-Ship Agent (firmware risk):</span>
+composite = (binaryDiff × 0.30) + (behavioralSig × 0.25) + (knownVulns × 0.20)
+          + (hwCompat × 0.15) + (configDrift × 0.10)
+
+<span class="formula-comment">// Monitor Agent (field telemetry health):</span>
+composite = (adcOffset × 0.25) + (clockSkew × 0.20) + (powerRipple × 0.20)
+          + (gpio × 0.15) + (temp × 0.10) + (memUsage × 0.10)
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Score Range</th><th>Label</th><th>Pre-Ship Action</th><th>Field Action</th></tr>
+      </thead>
+      <tbody>
+        <tr class="threshold-row-safe">
+          <td>0.00 – 0.19</td><td><span class="badge badge-safe">SAFE</span></td>
+          <td>Pass — release approved</td><td>No action</td>
+        </tr>
+        <tr class="threshold-row-low">
+          <td>0.20 – 0.39</td><td><span class="badge badge-low">LOW</span></td>
+          <td>Pass — informational flag</td><td>Informational log</td>
+        </tr>
+        <tr class="threshold-row-warning">
+          <td>0.40 – 0.69</td><td><span class="badge badge-warning">WARNING</span></td>
+          <td>Warn — engineer review required</td><td>WARNING alert raised</td>
+        </tr>
+        <tr class="threshold-row-critical">
+          <td>0.70 – 1.00</td><td><span class="badge badge-critical">CRITICAL</span></td>
+          <td>Block — release halted</td><td>CRITICAL alert, urgent response</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Platform Capabilities</h3>
+    <ul class="pillar-list">
+      <li>
+        <span class="pillar-title">Pre-Ship Scanning &amp; CI/CD Gate</span>
+        Hooks into Arduino IDE, VS Code/PlatformIO, Keil/STM32CubeIDE, Jenkins CI, GitHub Actions,
+        and Docker builds. Scores each firmware release on five dimensions and issues a
+        Pass / Warn / Block verdict that can gate the entire deployment pipeline automatically.
+      </li>
+      <li>
+        <span class="pillar-title">Fleet Health Dashboard</span>
+        Real-time view of all registered devices across fleets — per-device drift scores, health
+        status (Healthy / Warning / Critical), live alert feed, and trend charts delivered via
+        WebSocket push. No polling required.
+      </li>
+      <li>
+        <span class="pillar-title">Field Monitor &amp; Alert System</span>
+        Evaluates every incoming telemetry sample against the device's captured golden baseline.
+        Detects threshold crossings with debounced alerting (no alert storms), raises typed
+        alerts with signal-level detail, and supports in-platform acknowledgement with attribution.
+      </li>
+      <li>
+        <span class="pillar-title">Drift Analysis &amp; Cross-Signal Correlation</span>
+        A 6×6 signal correlation heatmap surfaces cross-domain relationships (e.g., power ripple
+        coupling into ADC offset coupling into clock cascade). Root-cause hypotheses are ranked by
+        confidence score with affected component attribution and resolution suggestions.
+      </li>
+      <li>
+        <span class="pillar-title">Firmware Diff &amp; Incident Replay</span>
+        Binary-level, register-aware comparison between running and baseline firmware versions.
+        Simulation lab for injecting hypothesised fault conditions and validating root causes
+        against historical field data before committing to a fix.
+      </li>
+      <li>
+        <span class="pillar-title">Knowledge Base</span>
+        Searchable, article-structured repository of resolved incident findings — root cause,
+        resolution steps, affected device families, firmware versions, and signal tags. Articles
+        are generated from and linked to specific incidents, making institutional knowledge
+        findable and reusable across all future investigations.
+      </li>
+      <li>
+        <span class="pillar-title">Engineer Onboarding</span>
+        Guided, stage-gated learning path covering platform architecture, hardware setup, drift
+        workflows, and CI/CD gating. Designed to reduce time-to-independent-investigation from
+        weeks to days.
+      </li>
+      <li>
+        <span class="pillar-title">CLI &amp; API-First Architecture</span>
+        A 17-command standalone CLI (<code>diagiot</code>) enables fleet management from any
+        terminal, IDE, or CI pipeline. A 31-endpoint REST API and WebSocket event stream expose
+        all platform data to external tools and custom dashboards.
+      </li>
+    </ul>
+
+    <h3>Architecture Summary</h3>
+    <p>
+      The DiagIoT MVP is implemented as a Node.js + Express backend with an in-process
+      event-driven store (no external database required), a WebSocket push layer for live UI
+      updates, and a single-page frontend with 10 screens. All three agents run as logic modules
+      within the server process. The system is deployable from a single <code>npm start</code>
+      command with zero external dependencies at the infrastructure level.
+    </p>
+
+    <div class="callout solution">
+      <strong>Outcome:</strong> DiagIoT moves embedded fleet management from reactive manual
+      investigation to a proactive, automated, agent-driven closed loop — catching firmware drift
+      risk before it ships, detecting field anomalies within seconds of threshold crossing, and
+      preserving the institutional knowledge that makes every future investigation faster than the
+      last.
+    </div>
+  </div>
+
+  <div class="doc-footer">Made with IBM Bob</div>
+</div>
+</body>
+</html>

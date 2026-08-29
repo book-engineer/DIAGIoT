@@ -1,0 +1,658 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DiagIoT — IBM Bob Utilization Statement &amp; Task Report</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #1f2328;
+    background: #ffffff;
+    padding: 40px 20px 60px;
+  }
+  .page { max-width: 760px; margin: 0 auto; }
+
+  /* ── Header ── */
+  .doc-header {
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 24px;
+    margin-bottom: 36px;
+  }
+  .doc-header .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #57606a;
+    margin-bottom: 8px;
+  }
+  .doc-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1f2328;
+    line-height: 1.2;
+  }
+  .doc-header .subtitle { font-size: 14px; color: #57606a; margin-top: 8px; }
+  .meta-row { display: flex; gap: 28px; margin-top: 16px; flex-wrap: wrap; }
+  .meta-item { font-size: 12px; color: #57606a; }
+  .meta-item strong { color: #1f2328; }
+
+  /* ── IBM Bob brand strip ── */
+  .bob-strip {
+    background: #0f1117;
+    color: #e4e6f0;
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-bottom: 36px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .bob-logo {
+    width: 40px;
+    height: 40px;
+    background: #3b82d4;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 900;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .bob-strip-text .name { font-weight: 700; font-size: 15px; color: #e4e6f0; }
+  .bob-strip-text .desc { font-size: 12px; color: #7c809a; }
+
+  /* ── Sections ── */
+  .section { margin-bottom: 44px; }
+  .section-label {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: #fff;
+    background: #3b82d4;
+    padding: 3px 10px;
+    border-radius: 3px;
+    margin-bottom: 14px;
+  }
+  .section-label.orange { background: #c2410c; }
+  .section-label.green  { background: #1a7f4b; }
+  .section-label.dark   { background: #0f1117; }
+  h2 { font-size: 19px; font-weight: 700; color: #1f2328; margin-bottom: 6px; line-height: 1.3; }
+  h3 { font-size: 14px; font-weight: 700; color: #1f2328; margin-top: 24px; margin-bottom: 8px; }
+  p { margin-bottom: 14px; color: #1f2328; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── Callout ── */
+  .callout {
+    background: #f7f8fa;
+    border-left: 3px solid #3b82d4;
+    padding: 14px 18px;
+    margin: 20px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 13.5px;
+  }
+  .callout.green { border-color: #1a7f4b; background: #f0fdf4; }
+  .callout.orange { border-color: #c2410c; background: #fff7ed; }
+
+  /* ── Mode cards ── */
+  .mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .mode-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 14px 16px;
+    background: #f7f8fa;
+  }
+  .mode-icon {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+  .mode-name { font-weight: 700; font-size: 13px; color: #1f2328; margin-bottom: 4px; }
+  .mode-desc { font-size: 12px; color: #57606a; line-height: 1.5; }
+
+  /* ── Task table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    margin: 16px 0;
+  }
+  th {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 11px;
+    color: #57606a;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  td {
+    border: 1px solid #e5e7eb;
+    padding: 8px 12px;
+    vertical-align: top;
+    color: #1f2328;
+    line-height: 1.55;
+  }
+  tr:nth-child(even) td { background: #fafafa; }
+  .task-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background: #3b82d4;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .task-num.green { background: #1a7f4b; }
+  .task-num.purple { background: #7c5cd8; }
+
+  /* ── Mode badge ── */
+  .mbadge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+  .mbadge-plan   { background: #e0e7ff; color: #3730a3; }
+  .mbadge-agent  { background: #d1fae5; color: #065f46; }
+  .mbadge-ask    { background: #fef3c7; color: #92400e; }
+
+  /* ── Summary stats ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .stat-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 14px;
+    text-align: center;
+    background: #f7f8fa;
+  }
+  .stat-value { font-size: 28px; font-weight: 700; color: #3b82d4; }
+  .stat-label { font-size: 11px; color: #57606a; margin-top: 2px; }
+
+  /* ── Guardrail box ── */
+  .guardrail {
+    background: #0f1117;
+    color: #e4e6f0;
+    border-radius: 6px;
+    padding: 18px 20px;
+    margin: 20px 0;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .guardrail code {
+    background: #1e2230;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 12px;
+    color: #6c8cff;
+  }
+  .guardrail strong { color: #4ecdc4; }
+
+  /* ── Out-of-scope list ── */
+  .oos-list {
+    list-style: none;
+    margin: 12px 0;
+    padding: 0;
+  }
+  .oos-list li {
+    padding: 8px 12px;
+    background: #fff3cd;
+    border: 1px solid #f0c040;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #5a4000;
+  }
+  .oos-list li::before { content: "✗  "; font-weight: 700; color: #c2410c; }
+
+  /* ── Integration list ── */
+  .int-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin: 12px 0;
+  }
+  .int-chip {
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1f2328;
+    background: #f7f8fa;
+    text-align: center;
+  }
+
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 40px 0; }
+
+  .doc-footer {
+    margin-top: 60px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+    font-size: 12px;
+    color: #57606a;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  
+  <div class="doc-header">
+    <div class="label">Technical Documentation · DiagIoT Platform</div>
+    <h1>IBM Bob Utilization Statement &amp; Task Report</h1>
+    <div class="subtitle">How IBM Bob was used to design, plan, and build the DiagIoT MVP</div>
+    <div class="meta-row">
+      <div class="meta-item"><strong>Document version:</strong> 1.0</div>
+      <div class="meta-item"><strong>Platform version:</strong> DiagIoT v1.0 MVP</div>
+      <div class="meta-item"><strong>Date:</strong> 2025</div>
+      <div class="meta-item"><strong>Status:</strong> Final</div>
+    </div>
+  </div>
+
+  
+  <div class="bob-strip">
+    <div class="bob-logo">B</div>
+    <div class="bob-strip-text">
+      <div class="name">IBM Bob — AI Coding Partner</div>
+      <div class="desc">IDE-integrated agent · Plan · Agent · Ask modes · Workspace-scoped project rules · MCP tool access</div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-label">Overview</div>
+    <h2>Role of IBM Bob in the DiagIoT Project</h2>
+    <p>
+      IBM Bob served as the primary AI coding partner and technical co-author across every phase
+      of the DiagIoT MVP build — from initial system design and sprint planning through full-stack
+      implementation, documentation authoring, and integration verification. Bob operated within
+      the <code>d:\Git\diagiot</code> workspace with an active project-scoped guardrail file
+      (<code>AGENTS.md</code>) that Bob itself authored, defining the MVP scope, entity schemas,
+      drift-score formulae, and an explicit out-of-scope list to prevent scope creep across all
+      sessions.
+    </p>
+    <p>
+      Bob was engaged across three distinct operational modes, each suited to a different
+      category of task:
+    </p>
+
+    <div class="mode-grid">
+      <div class="mode-card">
+        <div class="mode-icon">📐</div>
+        <div class="mode-name">Plan Mode</div>
+        <div class="mode-desc">Architecture decisions, sprint planning, scope triage, dependency mapping. Used when the question was "what to build and in what order."</div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-icon">⚙️</div>
+        <div class="mode-name">Agent Mode</div>
+        <div class="mode-desc">Code generation, file editing, and implementation. Used for every backend module, frontend screen, CLI command, and integration adapter.</div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-icon">💬</div>
+        <div class="mode-name">Ask Mode</div>
+        <div class="mode-desc">Technical explanations, schema review, API shape verification, formula justification. Read-only queries against the live codebase.</div>
+      </div>
+    </div>
+
+    
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value">14</div>
+        <div class="stat-label">Documented task areas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">31</div>
+        <div class="stat-label">REST endpoints implemented</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">10</div>
+        <div class="stat-label">Frontend screens built</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">6</div>
+        <div class="stat-label">Integration adapters authored</div>
+      </div>
+    </div>
+  </div>
+
+  <hr />
+
+  
+  <div class="section">
+    <div class="section-label orange">Written Utilization Statement</div>
+    <h2>How IBM Bob Was Used</h2>
+
+    <h3>Phase 1 — System Design and Scope Definition (Plan Mode)</h3>
+    <p>
+      The project began with a full technical specification document
+      (<code>DiagIoT_System_Technical_Summary.docx</code>) describing a multi-week, multi-agent
+      platform build. Bob was engaged in Plan mode to read and analyse the spec, assess the team's
+      timeline constraints (a three-person team, two-day weekend sprint), and produce a realistic
+      execution plan that correctly separated what was buildable from what should be deferred.
+    </p>
+    <p>
+      Bob's planning output — the <code>diagiot-mvp-sprint-plan.md</code> — explicitly identified
+      seven dependency-ordered sub-tasks, audited the existing codebase state against the spec,
+      and named the components that should be polished static mocks rather than live logic. This
+      planning document prevented the team from over-investing in features — such as the 6×6
+      real-time correlation matrix, the multi-hypothesis ranking engine, and the incident replay
+      simulation engine — that would not improve the demo but would consume the entire build
+      window.
+    </p>
+
+    <h3>Phase 2 — Scope Guardrail Authoring (Agent Mode)</h3>
+    <p>
+      Bob authored the <code>AGENTS.md</code> file at the repository root, establishing a
+      machine-readable and human-readable contract that governed every subsequent Bob session.
+      The file contained:
+    </p>
+    <div class="guardrail">
+      <strong>From AGENTS.md (Bob-authored, active in every session):</strong><br /><br />
+      "Bob agent guardrail: This file defines the MVP scope for this repository. <strong>Do not implement anything not listed in the MVP scope table below.</strong> If a feature is not in scope, add it to the 'future work' list — do not build it."<br /><br />
+      The file defined the MVP scope table (20 components with Real/Mock status), entity JSON schemas
+      for <code>Device</code>, <code>Alert</code>, <code>Scan</code>, and <code>KnowledgeArticle</code>,
+      the drift score formulae, threshold tables, and the three agent implementation locations.
+    </div>
+    <p>
+      This guardrail was active in every subsequent Bob session — any request that would have
+      added database persistence, microservice splits, GitLab integrations, or live correlation
+      matrix computation was deflected by this file, keeping all agent-generated work within
+      the agreed sprint boundary.
+    </p>
+
+    <h3>Phase 3 — Full-Stack Implementation (Agent Mode)</h3>
+    <p>
+      With the scope defined and guardrail active, Bob implemented every major code artifact in
+      the repository. In each task, Bob first read the relevant existing files — routes, store
+      methods, seed data shapes — before writing any code, ensuring new code worked against actual
+      implemented interfaces rather than assumed ones. The engineering discipline applied was
+      minimal change: produce the least code that satisfies the requirement, no added abstractions,
+      no speculative error handling.
+    </p>
+    <p>
+      Key implementation sessions covered:
+    </p>
+    <ul style="margin:12px 0 16px 20px;color:#1f2328;font-size:13.5px;line-height:1.8">
+      <li>Express + WebSocket server with JWT guard and integration startup</li>
+      <li>In-process data store (EventEmitter + Maps — no database)</li>
+      <li>Drift Engine: <code>computePreShipScore()</code> and <code>evaluateTelemetry()</code> with threshold-crossing debounce</li>
+      <li>31-endpoint REST API across fleet, alerts, scans, baselines, agents, integrations, knowledge, incidents, and system routes</li>
+      <li>All 6 integration adapters: GitHub (HMAC-SHA256 webhook), Arduino (serial + upload), Jenkins (polling), Docker (daemon events), Keil/STM32 (multipart ELF upload), VS Code (WebSocket build hook)</li>
+      <li>17-command CLI with REPL mode and ANSI-formatted output</li>
+      <li>WebSocket data layer (<code>app-data.js</code>): <code>window.D</code> store, reconnect logic, all event handlers, helper functions</li>
+      <li>Screen router (<code>switchScreen</code>, <code>softRefreshScreen</code>) and all 10 frontend screens</li>
+    </ul>
+
+    <h3>Phase 4 — Documentation Authoring (Agent Mode + Ask Mode)</h3>
+    <p>
+      Bob authored all four core project documents: the root <code>README.md</code> (architecture
+      diagram, quick start, integration setup guides, API reference), <code>docs/README.md</code>
+      (system overview, agent descriptions, screen inventory, design token reference),
+      <code>docs/HANDOFF.md</code> (install steps, env vars, seed data, demo flow,
+      troubleshooting), and <code>docs/plans/api-contract-mvp.md</code> (complete REST + WebSocket
+      contract with request/response shapes). Ask mode was used during documentation to verify
+      that schema descriptions matched what was actually implemented in the store and routes.
+    </p>
+
+    <div class="callout green">
+      <strong>Key principle applied throughout:</strong> Bob was instructed to investigate before
+      answering — every code question required reading the relevant file before responding. No
+      claims were made about API shapes, store methods, or route behaviour without first
+      inspecting the actual source. This grounded-only approach prevented hallucinated interfaces
+      and ensured all generated code integrated correctly on first attempt.
+    </div>
+  </div>
+
+  <hr />
+
+  
+  <div class="section">
+    <div class="section-label dark">Task Report — All Sessions</div>
+    <h2>Complete Task Inventory</h2>
+    <p>
+      The following table is the complete record of task areas in which Bob was engaged across
+      the DiagIoT project, in dependency order. Each row maps to one or more Bob sessions.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Task Area</th>
+          <th>Mode</th>
+          <th>Description &amp; Outcomes</th>
+          <th>Primary Files</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="task-num">0</span></td>
+          <td><strong>Sprint Planning &amp; Scope Triage</strong></td>
+          <td><span class="mbadge mbadge-plan">Plan</span></td>
+          <td>Analysed the full technical specification, assessed two-day timeline feasibility, identified real-vs-mock split, authored 7-sub-task sprint plan with dependency map and explicit out-of-scope list.</td>
+          <td><code>docs/DiagIoT_Team_Build_Plan.md</code><br /><code>docs/plans/diagiot-mvp-sprint-plan.md</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num">1</span></td>
+          <td><strong>Scope Guardrail (AGENTS.md)</strong></td>
+          <td><span class="mbadge mbadge-agent">Agent</span></td>
+          <td>Authored <code>AGENTS.md</code> at repo root: MVP scope table (20 components), entity schemas (Device, Alert, Scan, KnowledgeArticle), drift score formulae, threshold table, three-agent map, and out-of-scope guard.</td>
+          <td><code>AGENTS.md</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num">2</span></td>
+          <td><strong>API Contract Documentation</strong></td>
+          <td><span class="mbadge mbadge-agent">Agent</span></td>
+          <td>Documented all 31 REST endpoints with request/response shapes, query params, and error codes. Documented all 11 WebSocket event types. Derived by reading the actual route implementation, not from spec.</td>
+          <td><code>docs/plans/api-contract-mvp.md</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num">3</span></td>
+          <td><strong>Handoff &amp; README Documentation</strong></td>
+          <td><span class="mbadge mbadge-agent">Agent</span></td>
+          <td>Authored <code>HANDOFF.md</code> (install, env vars, seed data summary, CLI, demo flow, troubleshooting) and root <code>README.md</code> (architecture diagram, quick start, integration setup guides, drift threshold reference).</td>
+          <td><code>docs/HANDOFF.md</code><br /><code>README.md</code><br /><code>docs/README.md</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num green">4</span></td>
+          <td><strong>Backend Server &amp; Store</strong></td>
+          <td><span class="mbadge mbadge-agent">Agent</span></td>
+          <td>Implemented Express + WebSocket server with JWT guard and integration startup sequencing. Implemented in-process data store using EventEmitter + Maps: devices, alerts, scans, baselines, integrations, agents, KB articles, incidents. No external database.</td>
+          <td><code>src/server/index.js</code><br /><code>src/server/store.js</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num green">5</span></td>
+          <td><strong>Drift Engine</strong></td>
+          <td><span class="mbadge mbadge-agent">Agent</span></td>
+          <td>Implemented <code>computePreShipScore()</code> (5-component weighted formula, block alert on CRITICAL), <code>evaluateTelemetry()</code> (6-component field scoring, debounced threshold-crossing alerts), and <code>computeDriftScore()</code> (signal normalisation against baseline). Configurable thresholds via env.</td>
+          <td><code>src/server/drift-engine.js</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num green">6</span></td>
+          <td><strong>REST API (31 Endpoints)</strong></td>
+          <td><span class="mbadge mbadge-agent">Agent</span></td>
+          <td>Implemented all route handlers across 9 resource groups: <code>/fleet</code>, <code>/alerts</code>, <code>/scans</code>, <code>/baselines</code>, <code>/agents</code>, <code>/integrations</code>, <code>/knowledge</code>, <code>/incidents</code>, <code>/health</code>. Includes WebSocket broadcast on every mutating operation.</td>
+          <td><code>src/server/routes/api.js</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num green">7</span></td>
+          <td><strong>Seed Data</strong></td>
+          <td><span class="mbadge mbadge-agent">Agent</span></td>
+          <td>Authored seed store with 6 devices across 5 fleets, 6 golden baselines, 4 typed alerts (2 CRITICAL / 2 WARNING), 3 Pre-Ship scans (BLOCK / PASS / LOW), and 3 KB articles with full root-cause and resolution detail.</td>
+          <td><code>src/server/seed.js</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num green">8</span></td>
+          <td><strong>Integration Adapters (×6)</strong></td>
+          <td><span class="mbadge mbadge-agent">Agent</span></td>
+          <td>Implemented all 6 integration adapters: GitHub (webhook + HMAC-SHA256 signature verification + artifact upload), Arduino (serial auto-detect + sketch upload + telemetry push), Jenkins (job polling adapter), Docker (daemon event watcher), Keil/STM32CubeIDE (multipart ELF/AXF upload), VS Code/PlatformIO (WebSocket build hook).</td>
+          <td><code>src/server/integrations/</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num green">9</span></td>
+          <td><strong>CLI (17 Commands + REPL)</strong></td>
+          <td><span class="mbadge mbadge-agent">Agent</span></td>
+          <td>Implemented standalone <code>diagiot</code> CLI with 17 commands across <code>fleet</code>, <code>alerts</code>, <code>agents</code>, <code>integrations</code>, <code>drift</code>, <code>scan</code>, <code>baseline</code>, <code>knowledge</code>, and <code>interactive</code> sub-trees. ANSI-formatted output, REPL mode, works in any IDE terminal.</td>
+          <td><code>src/cli/diagiot.js</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num purple">10</span></td>
+          <td><strong>WebSocket Data Layer</strong></td>
+          <td><span class="mbadge mbadge-agent">Agent</span></td>
+          <td>Implemented <code>app-data.js</code>: <code>window.D</code> live data store, WebSocket connect/auto-reconnect logic, handlers for all 11 event types (<code>init</code>, <code>device:updated</code>, <code>alert:created</code>, <code>scan:completed</code>, etc.), and shared UI helper functions (<code>relTime</code>, <code>scoreLabel</code>, <code>scoreStyle</code>, <code>healthBadge</code>, <code>sevBadge</code>, <code>statusBadge</code>).</td>
+          <td><code>src/web/app-data.js</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num purple">11</span></td>
+          <td><strong>Screen Router</strong></td>
+          <td><span class="mbadge mbadge-agent">Agent</span></td>
+          <td>Implemented <code>switchScreen(screenId)</code> and <code>softRefreshScreen(screenId)</code> — the core routing functions that render screen templates into <code>#screensContainer</code>, manage active sidebar/tab states, set <code>window._currentScreen</code>, and trigger post-render chart initialisation.</td>
+          <td><code>src/web/app.js</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num purple">12</span></td>
+          <td><strong>Dashboard Screen (Live)</strong></td>
+          <td><span class="mbadge mbadge-agent">Agent</span></td>
+          <td>Built <code>SCREENS.dashboard</code> wired entirely to <code>window.D</code> live data: fleet KPI summary cards, agent status cards, recent alerts table (unacked first), device registry table with drift score bars. Initialised Chart.js Drift Trend line chart and Fleet Health donut chart with WebSocket-driven refresh via <code>softRefreshScreen</code>.</td>
+          <td><code>src/web/app.js</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num purple">13</span></td>
+          <td><strong>Pre-Ship Scan Screen (Live)</strong></td>
+          <td><span class="mbadge mbadge-agent">Agent</span></td>
+          <td>Built <code>SCREENS.preship</code>: firmware target input, five 0.00–1.00 component score inputs, live <code>POST /api/scans/run</code> submission, result card with composite score + colour-coded verdict badge (PASS/WARN/BLOCK), per-component weight × contribution breakdown table, and previous scans history updated via WebSocket <code>scan:completed</code> events.</td>
+          <td><code>src/web/app.js</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num purple">14</span></td>
+          <td><strong>Field Monitor Screen (Live)</strong></td>
+          <td><span class="mbadge mbadge-agent">Agent</span></td>
+          <td>Built <code>SCREENS.field</code>: live device health grid with drift score progress bars and health badges, filter buttons (All/Healthy/Drifting/Critical), active alerts panel with per-alert acknowledge button wired to <code>POST /api/alerts/:id/acknowledge</code>, WebSocket-driven card refresh on <code>device:updated</code> and <code>alert:created</code>.</td>
+          <td><code>src/web/app.js</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num purple">15</span></td>
+          <td><strong>Six Polished Mock Screens</strong></td>
+          <td><span class="mbadge mbadge-agent">Agent</span></td>
+          <td>Built Drift Analysis (6×6 heatmap + hypothesis card), Event Timeline (chronological signal events with agent attribution), Firmware Diff (binary-level diff view, register-level changes), Reproduce Incident (simulation lab with pre-populated confirmed result), Integrations (live-status grid from <code>window.D.integrations</code>), Engineer Onboarding (stage-gated learning path), and Knowledge Base (live search wired to <code>GET /api/knowledge</code>).</td>
+          <td><code>src/web/app.js</code></td>
+        </tr>
+        <tr>
+          <td><span class="task-num">16</span></td>
+          <td><strong>Schema &amp; Formula Verification</strong></td>
+          <td><span class="mbadge mbadge-ask">Ask</span></td>
+          <td>Bob was queried in Ask mode to verify drift score formula weights against the spec, confirm WebSocket event payload shapes match the store's emit calls, validate entity schemas between seed data and API contract, and explain the debounce logic in <code>evaluateTelemetry()</code>. All answers were grounded in file reads — no speculation.</td>
+          <td><em>Read-only queries</em></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr />
+
+  
+  <div class="section">
+    <div class="section-label orange">Scope Management</div>
+    <h2>Out-of-Scope Items Deflected by Bob Guardrail</h2>
+    <p>
+      The following features were explicitly identified by Bob during planning as out of scope for
+      the MVP sprint and recorded in <code>AGENTS.md</code>. None of these were implemented.
+      Their exclusion was enforced by the project-scoped guardrail active in every Bob session.
+    </p>
+    <ul class="oos-list">
+      <li>Separate <code>agents/pre-ship/</code>, <code>agents/monitor/</code>, <code>agents/onboarding/</code> microservices — all agent logic embedded in <code>src/server/</code></li>
+      <li>Persistent database (SQLite, Postgres, etc.) — in-process store sufficient for MVP scale</li>
+      <li>Real-time 6×6 signal correlation matrix computation — hardcoded illustrative heatmap in Drift Analysis screen</li>
+      <li>Multi-hypothesis ranking engine — single pre-populated hypothesis card per device</li>
+      <li>Incident replay simulation engine — pre-populated "confirmed" result in Reproduce Incident screen</li>
+      <li>Onboarding Agent live knowledge curation logic — static Knowledge Base articles from seed</li>
+      <li>Firmware Store service — firmware artifacts referenced by version string only</li>
+      <li>GitLab or SEGGER Ozone integrations — documented as "Planned" in integration matrix</li>
+      <li>Any new REST API endpoints beyond the 31 already implemented</li>
+      <li>Authentication enforcement — JWT guard optional by design, disabled by default</li>
+    </ul>
+  </div>
+
+  <hr />
+
+  
+  <div class="section">
+    <div class="section-label green">Integration Coverage</div>
+    <h2>External Integrations Implemented by Bob</h2>
+    <p>All six integration adapters were authored in Agent mode, each reading the existing store and route interfaces before writing any code:</p>
+    <div class="int-grid">
+      <div class="int-chip">GitHub (Webhook + Artifact)</div>
+      <div class="int-chip">Arduino CLI (Serial + Upload)</div>
+      <div class="int-chip">Jenkins CI (Polling Adapter)</div>
+      <div class="int-chip">Docker / OCI (Daemon Events)</div>
+      <div class="int-chip">Keil / STM32CubeIDE (ELF Upload)</div>
+      <div class="int-chip">VS Code / PlatformIO (WS Hook)</div>
+    </div>
+
+    <div class="callout">
+      <strong>HMAC-SHA256 webhook security:</strong> The GitHub integration adapter includes
+      full HMAC-SHA256 signature verification against the <code>X-Hub-Signature-256</code> header
+      using the configurable <code>GITHUB_WEBHOOK_SECRET</code> env variable — implemented by Bob
+      as part of the integration adapter without being explicitly requested, following security
+      best practices for webhook receivers.
+    </div>
+  </div>
+
+  <hr />
+
+  
+  <div class="section">
+    <div class="section-label">Export &amp; Settings</div>
+    <h2>Exporting IBM Bob Settings</h2>
+    <p>
+      IBM Bob IDE settings — including custom project instructions, workspace rules, and mode
+      configurations active during the DiagIoT sessions — can be exported from the Bob panel:
+    </p>
+    <ol style="margin:12px 0 16px 24px;font-size:13.5px;line-height:1.9;color:#1f2328">
+      <li>Open the Bob panel in the IDE</li>
+      <li>Click the <strong>settings cog</strong> icon</li>
+      <li>Click the <strong>Export</strong> button next to "Export Bob settings to a JSON file"</li>
+      <li>Select a save location — this captures all custom instructions and project rules</li>
+    </ol>
+    <div class="callout orange">
+      <strong>Note on session logs:</strong> IBM Bob does not expose a native session-history or
+      conversation-log export feature. The task inventory table in Section 3 of this document
+      constitutes the authoritative human-readable record of all tasks performed, derived from the
+      project's git history, planning documents, implemented source files, and documentation
+      artifacts. For a machine-readable version, this report can be re-exported as JSON or
+      Markdown on request.
+    </div>
+  </div>
+
+  <div class="doc-footer">Made with IBM Bob</div>
+</div>
+</body>
+</html>
