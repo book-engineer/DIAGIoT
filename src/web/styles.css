@@ -1198,6 +1198,46 @@ body.dashboard-active .app-interface {
   color: var(--danger);
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.btn-github {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 16px;
+  background: #24292f;
+  color: #fff;
+  border: 1px solid #444c56;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-github:hover {
+  background: #383e47;
+}
+.btn-github:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .auth-modal-footer {
   padding: 16px 22px;
   background: var(--surface2);

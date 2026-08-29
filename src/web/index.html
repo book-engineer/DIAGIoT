@@ -6,7 +6,26 @@
 <title>DiagIoT — Autonomous Drift Detection Platform</title>
 <script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <link rel="stylesheet" href="styles.css">
+<script>
+// Fetch Supabase credentials from the server then initialise the client.
+// Sets window.SB (SupabaseClient) and resolves window._sbInitPromise so
+// app-data.js and app.js can await auth readiness before connecting.
+window._sbInitPromise = (async function () {
+  try {
+    const base = (window.DIAGIOT_SERVER || '').replace(/\/$/, '');
+    const res  = await fetch(base + '/api/config');
+    if (!res.ok) return;
+    const cfg = await res.json();
+    if (cfg.supabaseUrl && cfg.supabaseKey && window.supabase) {
+      window.SB = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey);
+    }
+  } catch (e) {
+    console.warn('[DiagIoT] Supabase init failed — running in no-auth mode.', e.message);
+  }
+})();
+</script>
 <script>
 (function(){
   const DEFAULT_BASE = (window.DIAGIOT_SERVER || 'http://localhost:3000').replace(/\/$/,'');
@@ -600,6 +619,13 @@
         <label for="authKey" class="auth-label">Access Key / Session Token</label>
         <input type="password" id="authKey" class="auth-input" value="diag-prod-node-key-889" autocomplete="current-password" required>
       </div>
+
+      <div class="auth-divider"><span>or</span></div>
+
+      <button class="btn btn-github" id="authGithubBtn" onclick="signInWithGitHub()" aria-label="Sign in with GitHub">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23A11.51 11.51 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.29-1.552 3.297-1.23 3.297-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.298 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        <span>Sign in with GitHub</span>
+      </button>
 
       <div class="auth-status-box" id="authStatusBox" aria-live="polite">
         <i class="ph-bold ph-shield-check" aria-hidden="true"></i>

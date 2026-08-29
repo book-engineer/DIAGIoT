@@ -1965,6 +1965,30 @@ async function submitAuthLaunch() {
     _authSetStatus('error', err.message || 'Authentication failed — please check your credentials.');
   }
 }
+async function signInWithGitHub() {
+  const btn = document.getElementById('authGithubBtn');
+  if (btn) btn.disabled = true;
+  _authSetStatus('verifying', 'Redirecting to GitHub...');
+
+  if (window._sbInitPromise) await window._sbInitPromise;
+  if (!window.SB) {
+    _authSetStatus('error', 'Auth not configured — Supabase credentials missing.');
+    if (btn) btn.disabled = false;
+    return;
+  }
+  try {
+    const { error } = await window.SB.auth.signInWithOAuth({
+      provider: 'github',
+      options: { redirectTo: window.location.origin + '/' },
+    });
+    if (error) throw error;
+    // Browser will redirect — no further action needed here
+  } catch (err) {
+    _authSetStatus('error', err.message || 'GitHub sign-in failed.');
+    if (btn) btn.disabled = false;
+  }
+}
+
 function _applySessionUser(user) {
   if (!user) return;
 
@@ -2281,10 +2305,19 @@ Object.entries(SCREEN_ALIASES).forEach(([alias, canonical]) => {
  * Render a screen into #screensContainer, update nav/tab active states.
  * Exported on window so app-data.js and inline onclick handlers can call it.
  */
-function switchScreen(rawScreenId) {
+function switchScreen(rawScreenId, _fromHashChange) {
   const screenId = SCREEN_ALIASES[rawScreenId] || rawScreenId;
   const container = document.getElementById('screensContainer');
   if (!container) return;
+
+  // Keep the URL hash in sync so browser back/forward works.
+  // Skip pushState when we're already responding to a hashchange event.
+  if (!_fromHashChange) {
+    const newHash = '#' + screenId;
+    if (window.location.hash !== newHash) {
+      history.pushState({ screen: screenId }, '', newHash);
+    }
+  }
 
   const template = SCREENS[screenId] || SCREENS[rawScreenId];
   if (template) {
@@ -2348,6 +2381,14 @@ function softRefreshScreen(screenId) {
 
 window.switchScreen = switchScreen;
 window.softRefreshScreen = softRefreshScreen;
+
+// Restore the correct screen when the user navigates back/forward.
+window.addEventListener('hashchange', function() {
+  const raw = window.location.hash.replace('#', '');
+  if (raw && (SCREENS[raw] || SCREEN_ALIASES[raw]) && window._currentScreen !== (SCREEN_ALIASES[raw] || raw)) {
+    switchScreen(raw, true);
+  }
+});
 window.SCREEN_INIT = SCREEN_INIT;
 
 // ── Dashboard chart initialisation ───────────────────────────────────────────
