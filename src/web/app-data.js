@@ -2,7 +2,7 @@
 
 'use strict';
 
-window.D = {
+var D = window.D = {
   fleet:        { total: 0, healthy: 0, drifting: 0, critical: 0, uptime: '—', alertCount: 0, agentsOnline: 0 },
   devices:      [],
   alerts:       [],
@@ -146,6 +146,14 @@ function handleServerMessage(msg) {
       D.knowledge = [msg.data, ...D.knowledge.filter(a => a.id !== msg.data.id)];
       refreshCurrentScreen();
       break;
+
+    case 'alert:enriched': {
+      // Bob Agent enriched an alert with AI analysis — update in-cache copy
+      const idx = D.alerts.findIndex(a => a.id === msg.data.id);
+      if (idx >= 0) D.alerts[idx] = msg.data;
+      refreshCurrentScreen();
+      break;
+    }
   }
 }
 

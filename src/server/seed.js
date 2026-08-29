@@ -1,98 +1,99 @@
 'use strict';
 
+/**
+ * DiagIoT — Store Seed
+ *
+ * Populates the in-memory store with representative devices, baselines,
+ * knowledge articles, and initial scan data so the dashboard is non-empty
+ * from the very first page load — no real hardware required.
+ *
+ * All seeded data is clearly labelled SEED so operators know it is
+ * placeholder data until real devices register themselves via the API.
+ */
+
 function seedStore(store) {
-  if (store.getAllDevices().length > 0) return;
-
+  // ── Devices ──────────────────────────────────────────────────────────────────
   const devices = [
-    { id: 'SH-X4-3192', name: 'SensorHub-X4 #3192', fleet: 'Pacific NW Grid', fw: 'v3.8.2-rc4', driftScore: 0.87, health: 'critical', source: 'jlink', ip: '10.24.11.92' },
-    { id: 'TN-R2-0841', name: 'ThermoNode-R2 #0841', fleet: 'EU Logistics Hub', fw: 'v3.8.1-stable', driftScore: 0.52, health: 'warning', source: 'socketcan', ip: '10.18.4.41' },
-    { id: 'AB-M7-5501', name: 'ActuatorBridge-M7 #5501', fleet: 'Factory Line A', fw: 'v3.8.2-rc4', driftScore: 0.44, health: 'warning', source: 'arduino', ip: '192.168.10.15' },
-    { id: 'SH-X4-1023', name: 'SensorHub-X4 #1023', fleet: 'Pacific NW Grid', fw: 'v3.8.1-stable', driftScore: 0.21, health: 'healthy', source: 'jlink', ip: '10.24.11.23' },
-    { id: 'EG-E1-7700', name: 'EdgeGateway-E1 #7700', fleet: 'Data Center East', fw: 'v3.8.2-rc4', driftScore: 0.91, health: 'critical', source: 'docker', ip: '172.16.80.70' },
-    { id: 'PG-P9-1209', name: 'PowerGrid-PM9 #1209', fleet: 'Midwest Substation', fw: 'v3.8.0-rel', driftScore: 0.12, health: 'healthy', source: 'serial', ip: '10.40.12.9' },
-    { id: 'DS-C1-4421', name: 'DriveSync-CAN #4421', fleet: 'Automotive Test Track', fw: 'v3.8.1-stable', driftScore: 0.35, health: 'healthy', source: 'socketcan', ip: '192.168.44.21' },
-    { id: 'AS-I2-9012', name: 'AeroSens-IMU #9012', fleet: 'Flight Systems Lab', fw: 'v3.8.2-rc4', driftScore: 0.18, health: 'healthy', source: 'segger', ip: '10.90.1.12' },
+    { id: 'SH-X4-3192', name: 'SensorHub-X4 #3192',      fleet: 'Pacific NW Grid',    fw: 'fw-v3.8.2-rc4',    driftScore: 0.87, health: 'CRITICAL' },
+    { id: 'TN-R2-0841', name: 'ThermoNode-R2 #0841',      fleet: 'EU Logistics Hub',   fw: 'fw-v2.4.0',        driftScore: 0.52, health: 'DRIFTING' },
+    { id: 'AB-M7-5501', name: 'ActuatorBridge-M7 #5501',  fleet: 'Factory Line A',     fw: 'fw-v1.9.3',        driftScore: 0.44, health: 'DRIFTING' },
+    { id: 'EG-E1-7700', name: 'EdgeGateway-E1 #7700',     fleet: 'Data Center East',   fw: 'fw-v4.1.0',        driftScore: 0.12, health: 'HEALTHY'  },
+    { id: 'PC-Z8-0022', name: 'PowerCtrl-Z8 #0022',       fleet: 'Factory Line B',     fw: 'fw-v2.1.7',        driftScore: 0.08, health: 'HEALTHY'  },
+    { id: 'SH-X4-1023', name: 'SensorHub-X4 #1023',       fleet: 'Pacific NW Grid',    fw: 'fw-v3.8.1-stable', driftScore: 0.21, health: 'HEALTHY'  },
   ];
+  devices.forEach(d => {
+    store.upsertDevice({ ...d, source: 'seed', updatedAt: new Date().toISOString() });
+  });
 
-  devices.forEach(d => store.upsertDevice(d));
+  // ── Baselines (golden reference readings for each seeded device) ─────────────
+  const baselines = [
+    { id: 'SH-X4-3192', readings: { adcOffset: 0,   gpioState: 0b10110, clockSkewNs: 0, powerRippleMv: 12, tempC: 42, memUsage: 0.48 }, tag: 'golden-v3.8.1' },
+    { id: 'TN-R2-0841', readings: { adcOffset: 0,   gpioState: 0b11001, clockSkewNs: 0, powerRippleMv: 8,  tempC: 38, memUsage: 0.31 }, tag: 'golden-v2.3.4' },
+    { id: 'AB-M7-5501', readings: { adcOffset: 0,   gpioState: 0b00111, clockSkewNs: 0, powerRippleMv: 15, tempC: 55, memUsage: 0.60 }, tag: 'golden-v1.9.0' },
+    { id: 'EG-E1-7700', readings: { adcOffset: 0,   gpioState: 0b11111, clockSkewNs: 0, powerRippleMv: 6,  tempC: 35, memUsage: 0.22 }, tag: 'golden-v4.0.2' },
+    { id: 'PC-Z8-0022', readings: { adcOffset: 0,   gpioState: 0b01100, clockSkewNs: 0, powerRippleMv: 10, tempC: 48, memUsage: 0.40 }, tag: 'golden-v2.1.5' },
+    { id: 'SH-X4-1023', readings: { adcOffset: 0,   gpioState: 0b10110, clockSkewNs: 0, powerRippleMv: 12, tempC: 42, memUsage: 0.47 }, tag: 'golden-v3.8.1' },
+  ];
+  baselines.forEach(b => store.setBaseline(b.id, { readings: b.readings, tag: b.tag, source: 'seed' }));
 
+  // ── Alerts ────────────────────────────────────────────────────────────────────
   const alerts = [
-    { id: 'alt-001', sev: 'CRITICAL', type: 'GPIO Register Mismatch', deviceId: 'SH-X4-3192', driftScore: 0.87, agent: 'monitor', message: 'GPIO register PORTB_CRH configuration mismatch against golden baseline commit 7b19a2f.' },
-    { id: 'alt-002', sev: 'CRITICAL', type: 'Memory Leak Pattern', deviceId: 'EG-E1-7700', driftScore: 0.91, agent: 'monitor', message: 'FreeRTOS Heap-4 allocation creep detected: 14.2 KB/hr steady growth.' },
-    { id: 'alt-003', sev: 'WARNING', type: 'Clock Skew Detected', deviceId: 'TN-R2-0841', driftScore: 0.52, agent: 'monitor', message: 'SysTick timer deviation exceeded 120ppm under elevated temperature cycle.' },
-    { id: 'alt-004', sev: 'WARNING', type: 'ADC Offset Drift', deviceId: 'AB-M7-5501', driftScore: 0.44, agent: 'monitor', message: 'Channel 3 ADC zero-point offset shifted by +48mV relative to calibration baseline.' },
+    { source: 'monitor', deviceId: 'SH-X4-3192', type: 'GPIO Register Mismatch', severity: 'CRITICAL', driftScore: 0.87, detail: 'GPIO state 0b10100 deviates from golden 0b10110 — register write race detected' },
+    { source: 'monitor', deviceId: 'TN-R2-0841', type: 'Clock Skew Detected',    severity: 'WARNING',  driftScore: 0.52, detail: 'TIM2 prescaler overspeed — crystal PLL drift +121ppm over 2-hour window' },
+    { source: 'monitor', deviceId: 'AB-M7-5501', type: 'ADC Offset Drift',       severity: 'WARNING',  driftScore: 0.44, detail: 'ADC0 offset drifted +48mV from baseline — possible supply noise source on AVDD rail' },
+    { source: 'monitor', deviceId: 'EG-E1-7700', type: 'Memory Leak Pattern',    severity: 'CRITICAL', driftScore: 0.91, detail: 'Heap fragmentation index rising 0.042/hr — suspected socket handle leak in MQTT task' },
   ];
-
   alerts.forEach(a => store.addAlert(a));
 
+  // ── Scans ─────────────────────────────────────────────────────────────────────
   const scans = [
-    {
-      id: 'scan-0828-rc4',
-      target: 'fw-v3.8.2-rc4',
-      verdict: 'FAIL',
-      score: 0.76,
-      ts: new Date(Date.now() - 3600000).toISOString(),
-      checks: [
-        { name: 'ELF Static Memory Sizing', status: 'PASS', score: 0.12 },
-        { name: 'Peripheral Register Delta', status: 'FAIL', score: 0.88, detail: 'TIM2_PSC register shifted from 0x0047 to 0x0052' },
-        { name: 'Dynamic Heap Leak Scan', status: 'FAIL', score: 0.74, detail: 'Heap fragmentation index rose above 0.30 threshold' },
-        { name: 'CAN Frame Timing Analysis', status: 'PASS', score: 0.15 }
-      ]
-    },
-    {
-      id: 'scan-0827-rel',
-      target: 'fw-v3.8.1-stable',
-      verdict: 'PASS',
-      score: 0.14,
-      ts: new Date(Date.now() - 86400000).toISOString(),
-      checks: [
-        { name: 'ELF Static Memory Sizing', status: 'PASS', score: 0.08 },
-        { name: 'Peripheral Register Delta', status: 'PASS', score: 0.11 },
-        { name: 'Dynamic Heap Leak Scan', status: 'PASS', score: 0.15 },
-        { name: 'CAN Frame Timing Analysis', status: 'PASS', score: 0.09 }
-      ]
-    }
+    { target: 'fw-v3.8.2-rc4',    composite: 0.76, decision: 'block', label: 'CRITICAL',
+      checks: [{ name: 'binary-diff', passed: false }, { name: 'behavioral-sig', passed: false }],
+      scores: { binaryDiff: 0.9, behavioralSig: 0.8, knownVulns: 0.5, hwCompat: 0.4, configDrift: 0.7 } },
+    { target: 'fw-v3.8.1-stable', composite: 0.14, decision: 'pass',  label: 'SAFE',
+      checks: [{ name: 'binary-diff', passed: true  }, { name: 'behavioral-sig', passed: true  }],
+      scores: { binaryDiff: 0.1, behavioralSig: 0.2, knownVulns: 0.1, hwCompat: 0.1, configDrift: 0.0 } },
+    { target: 'fw-v2.4.0',        composite: 0.31, decision: 'pass',  label: 'LOW',
+      checks: [{ name: 'binary-diff', passed: true  }],
+      scores: { binaryDiff: 0.3, behavioralSig: 0.2, knownVulns: 0.4, hwCompat: 0.2, configDrift: 0.3 } },
   ];
+  scans.forEach(s => store.addScan(s));
 
-  scans.forEach(s => store.scans.set(s.id, s));
-
-  const kbArticles = [
+  // ── Knowledge Base ─────────────────────────────────────────────────────────────
+  const articles = [
     {
-      id: 'kb-082',
-      title: 'STM32F4 ADC Sampling Drift on Shared DMA Buffer',
+      id: 'kb-001',
+      title: 'DMA Circular Buffer Overrun — ADC Truncation',
       affectedDevices: 'SensorHub-X4, ActuatorBridge-M7',
-      rootCause: 'DMA circular buffer pointer overrun under high interrupt load caused sample truncation.',
-      resolution: 'Reconfigure DMA double-buffering mode and increase priority of TIM2 trigger ISR.',
-      tags: ['adc', 'dma', 'stm32', 'drift']
+      rootCause: 'Enabling DMA_SxCR_CIRC on Stream 3 without resizing the buffer to a power-of-2 boundary causes ADC samples to wrap and truncate at index 255.',
+      resolution: 'Set DMA1_Stream3 to linear mode or resize buffer to 256 bytes. Validate with: TIM2->PSC = 0x0047 and DMA1_Stream3->CR &= ~DMA_SxCR_CIRC.',
+      tags: ['DMA', 'ADC', 'STM32', 'hardware', 'buffer-overrun'],
     },
     {
-      id: 'kb-041',
-      title: 'FreeRTOS Heap-4 Fragmentation under Async Socket Reconnects',
+      id: 'kb-002',
+      title: 'TIM2 Prescaler Overspeed — Clock Skew Cascade',
+      affectedDevices: 'ThermoNode-R2, SensorHub-X4',
+      rootCause: 'Setting TIM2->PSC = 0x0052 instead of 0x0047 increases base clock by 10%, propagating to all timer-derived peripherals.',
+      resolution: 'Revert TIM2->PSC to 0x0047. Cross-validate against crystal oscillator spec sheet at operating temperature.',
+      tags: ['clock', 'TIM2', 'prescaler', 'STM32', 'drift'],
+    },
+    {
+      id: 'kb-003',
+      title: 'MQTT Socket Handle Leak — Heap Fragmentation',
       affectedDevices: 'EdgeGateway-E1',
-      rootCause: 'Unbounded dynamic allocations in MQTT keepalive thread without block reuse.',
-      resolution: 'Enforce static allocation pools for packet descriptor buffers via pvPortMallocCaps.',
-      tags: ['freertos', 'heap', 'memory-leak', 'mqtt']
+      rootCause: 'MQTT reconnect logic allocates new socket handles without freeing stale TLS contexts during network drop/reconnect cycles.',
+      resolution: 'Call mbedtls_ssl_free(&tls_ctx) before mbedtls_ssl_setup on reconnect. Add FreeRTOS heap watermark alert at 256 bytes remaining.',
+      tags: ['MQTT', 'heap', 'TLS', 'FreeRTOS', 'memory-leak'],
     },
-    {
-      id: 'kb-119',
-      title: 'CAN 2.0B Bus-Off State Triggered by Bit Timing Drift',
-      affectedDevices: 'DriveSync-CAN, ThermoNode-R2',
-      rootCause: 'Uncompensated ceramic resonator thermal skew exceeded 1.5% CAN bit clock tolerance window.',
-      resolution: 'Switch to hardware-calibrated crystal oscillator circuit and increase SJW parameter.',
-      tags: ['can', 'socketcan', 'timing', 'bus-off']
-    }
   ];
+  articles.forEach(a => store.addKnowledgeArticle(a));
 
-  kbArticles.forEach(a => store.addKnowledgeArticle(a));
-
-  store.setAgentStatus('preship', 'active', { scansToday: 14, blockedReleases: 2 });
-  store.setAgentStatus('monitor', 'active', { nodesTracked: 1247, anomaliesIsolated: 4 });
-  store.setAgentStatus('onboard', 'active', { activeTracks: 3, kbArticlesIndexed: 3 });
-
-  store.setIntegrationStatus('arduino', 'disconnected', 'Waiting for USB-Serial device plug-in');
-  store.setIntegrationStatus('github', 'connected', 'Webhook listener verified with HMAC-SHA256');
-  store.setIntegrationStatus('vscode', 'connected', 'PlatformIO daemon connected via IPC');
-  store.setIntegrationStatus('segger', 'connected', 'J-Link SWD adapter probe active');
+  console.log('[Seed] Store seeded: ' +
+    devices.length + ' devices, ' +
+    baselines.length + ' baselines, ' +
+    alerts.length + ' alerts, ' +
+    scans.length + ' scans, ' +
+    articles.length + ' KB articles');
 }
 
 module.exports = { seedStore };

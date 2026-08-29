@@ -153,6 +153,9 @@ async function cmdHelp() {
     ['baseline capture --device <id>',  'Capture current firmware baseline'],
     ['knowledge list [--q <term>]',     'Knowledge base articles'],
     ['incidents list',                  'All recorded incidents'],
+    ['bob status',                      'Bob AI Agent connection status'],
+    ['bob analyze --id <alertId>',      'AI root-cause analysis for an alert'],
+    ['bob diff [--target <fw>]',        'AI firmware diff semantic analysis'],
     ['health',                          'Backend server health check'],
     ['interactive',                     'Start interactive REPL mode'],
     ['version',                         'Show CLI version'],
@@ -493,6 +496,69 @@ async function cmdHealth() {
   console.log('');
 }
 
+// ── Bob AI Agent commands ──────────────────────────────────
+
+async function cmdBobStatus() {
+  const data = await client.get('/integrations/bob/status');
+  header('Bob AI Agent — Status');
+  row('Connected',    data.connected  ? 'Yes' : 'No',  data.connected ? ok : warn);
+  row('Configured',  data.configured ? 'Yes' : 'No',  data.configured ? ok : warn);
+  row('Base URL',    data.baseUrl || '—');
+  row('Integration', (data.integration?.status) || '—', statusColor);
+  if (data.integration?.detail) row('Detail', data.integration.detail);
+  console.log('');
+  if (data.capabilities?.length) {
+    console.log(muted('  Capabilities:'));
+    data.capabilities.forEach(c => console.log(`    ${ok('•')} ${c}`));
+  }
+  console.log('');
+}
+
+async function cmdBobAnalyze(alertId) {
+  if (!alertId) {
+    // Analyze first active alert if no ID given
+    const alerts = await client.get('/alerts');
+    if (!alerts.length) { err('No active alerts. Use: bob analyze --id <alertId>'); return; }
+    alertId = alerts[0].id;
+    console.log(muted(`  Analyzing top alert: ${alertId}`));
+  }
+  const data = await client.post('/integrations/bob/analyze-alert', { alertId });
+  header('Bob AI — Alert Analysis');
+  if (!data.ok) { err(data.error || 'Analysis failed'); return; }
+  const a = data.analysis;
+  if (!a) { console.log(muted('  Analysis queued — check dashboard shortly.')); console.log(''); return; }
+  row('Hypothesis',       a.hypothesis || a.output || '—');
+  row('Confidence',       a.confidence != null ? (a.confidence * 100).toFixed(0) + '%' : '—',
+    v => parseFloat(v) > 70 ? ok(v) : warn(v));
+  row('Suggested Action', a.suggestedAction || a.action || '—');
+  row('Analyzed At',      a.analyzedAt ? relTime(a.analyzedAt) : '—');
+  console.log('');
+}
+
+async function cmdBobDiff(target) {
+  const fw = target || 'fw-v3.8.2-rc4';
+  const data = await client.post('/integrations/bob/diff', {
+    target:          fw,
+    baseVersion:     'fw-v3.8.1-stable',
+    headVersion:     fw,
+    symbolChanges:   ['ADC_Init', 'DMA_Config', 'GPIO_Init'],
+    registerChanges: [
+      { register: 'TIM2_PSC',  before: '0x0047', after: '0x0052' },
+      { register: 'DMA1_S3CR', before: '0x0C41', after: '0x0C49' },
+    ],
+  });
+  header(`Bob AI — Firmware Diff Analysis  (${fw})`);
+  if (!data.ok) { err(data.error || 'Diff analysis failed'); return; }
+  const r = data.result;
+  if (!r) { console.log(muted('  No result returned from Bob Agent.')); console.log(''); return; }
+  row('Risk Level',      r.riskLevel || '—',
+    v => v === 'CRITICAL' || v === 'HIGH' ? danger(v) : v === 'MEDIUM' ? warn(v) : ok(v));
+  row('Summary',         r.summary || r.output || '—');
+  row('Reason',          r.riskReason || '—');
+  row('Recommendation',  r.recommendation || '—');
+  console.log('');
+}
+
 function cmdVersion() {
   console.log('');
   console.log(bold(accent('  diagiot')) + muted(' v1.0.0'));
@@ -616,6 +682,13 @@ async function dispatch(parsed) {
   }
 
   if (cmd === 'health') { await cmdHealth(); return; }
+
+  if (cmd === 'bob') {
+    if (!sub || sub === 'status') { await cmdBobStatus();                       return; }
+    if (sub === 'analyze')        { await cmdBobAnalyze(flags.id || rest[0]);   return; }
+    if (sub === 'diff')           { await cmdBobDiff(flags.target || rest[0]);  return; }
+    err(`Unknown bob sub-command: "${sub}"`); return;
+  }
 
   err(`Unknown command: "${cmd}"`);
   console.error(muted('  Run: diagiot help'));

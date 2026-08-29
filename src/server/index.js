@@ -28,6 +28,7 @@ const jenkins   = require('./integrations/jenkins');
 const dockerInt = require('./integrations/docker');
 const arduino   = require('./integrations/arduino');
 const vsCode    = require('./integrations/vscode');
+const bobAgent  = require('./integrations/bob-agent');
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const HOST = process.env.HOST || 'localhost';
@@ -133,6 +134,7 @@ wss.on('connection', (ws, req) => {
 store.on('device:updated',       d => broadcast('device:updated',       d));
 store.on('alert:created',        a => broadcast('alert:created',        a));
 store.on('alert:acknowledged',   a => broadcast('alert:acknowledged',   a));
+store.on('alert:enriched',       a => broadcast('alert:enriched',       a));
 store.on('scan:completed',       s => broadcast('scan:completed',       s));
 store.on('baseline:captured',    b => broadcast('baseline:captured',    b));
 store.on('integration:updated',  i => broadcast('integration:updated',  i));
@@ -152,14 +154,10 @@ store.on('arduino:telemetry',    e => broadcast('activity', { source: 'arduino',
 async function startIntegrations() {
   console.log('[Server] Starting integration adapters...');
 
-  
   jenkins.start();
-
-  
   await dockerInt.start();
-
-  
   await arduino.connect();
+  await bobAgent.start();
 
   console.log('[Server] Integration adapters started.');
 }
@@ -187,6 +185,7 @@ function shutdown(signal) {
   jenkins.stop();
   dockerInt.stop();
   arduino.disconnect();
+  bobAgent.stop();
   server.close(() => {
     console.log('[Server] HTTP server closed');
     process.exit(0);

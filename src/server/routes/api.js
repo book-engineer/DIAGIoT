@@ -14,6 +14,7 @@ const jenkins   = require('../integrations/jenkins');
 const dockerInt = require('../integrations/docker');
 const keil      = require('../integrations/keil');
 const vscode    = require('../integrations/vscode');
+const bobAgent  = require('../integrations/bob-agent');
 
 const router  = express.Router();
 const upload  = multer({ dest: os.tmpdir() });
@@ -144,6 +145,12 @@ router.post('/integrations/keil/telemetry',  keil.telemetryHandler);
 
 router.post('/integrations/vscode/build',   vscode.buildHandler);
 router.get('/integrations/vscode/sessions', vscode.sessionsHandler);
+
+// Bob AI Agent
+router.get( '/integrations/bob/status',        bobAgent.statusHandler);
+router.post('/integrations/bob/analyze-alert', bobAgent.analyzeAlertHandler);
+router.post('/integrations/bob/diff',          bobAgent.diffHandler);
+router.post('/integrations/bob/synthesize-kb', bobAgent.synthesizeKbHandler);
 
 router.get('/knowledge', (req, res) => {
   const results = store.searchKnowledge(req.query.q);

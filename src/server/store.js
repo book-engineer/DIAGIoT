@@ -28,6 +28,7 @@ class Store extends EventEmitter {
       ['keil',     { id: 'keil',     name: 'Keil / STM32CubeIDE',       status: 'disconnected', detail: null, connectedAt: null }],
       ['gitlab',   { id: 'gitlab',   name: 'GitLab',                    status: 'disconnected', detail: null, connectedAt: null }],
       ['segger',   { id: 'segger',   name: 'SEGGER Ozone / J-Link',     status: 'disconnected', detail: null, connectedAt: null }],
+      ['bob',      { id: 'bob',      name: 'Bob AI Agent (IBM)',         status: 'disconnected', detail: null, connectedAt: null }],
     ]);
 
     
