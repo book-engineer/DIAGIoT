@@ -49,7 +49,7 @@ npm start
 npm run dev
 ```
 
-Open the web dashboard: **http://localhost:3000**
+Open the web dashboard: **http://localhost:3000/**
 
 ### 4. Use the CLI
 
